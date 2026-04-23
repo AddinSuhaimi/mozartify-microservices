@@ -9,6 +9,8 @@ const bcrypt = require("bcryptjs");
 const SALT_ROUNDS = 10;
 const express = require("express");
 
+const { isAuthenticated } = require("../modules/auth/middleware/auth.middleware");
+
 const UserModel = require("../models/User");
 const PurchaseModel = require("../models/Purchase");
 const Purchase2Model = require("../models/Purchase2");
@@ -81,7 +83,7 @@ const sendVerificationEmail = (email, username, token) => {
   );
 };
 */
-
+/* REFACTORED IN NOTIFICATION
 const sendAdminApprovalEmail = (adminEmail, username, email) => {
   const emailTemplate = `
   <div style="border: 2px solid #8BD3E6; border-radius: 10px; padding: 20px; font-family: 'Montserrat', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #F9FBFC;">
@@ -118,6 +120,7 @@ const sendAdminApprovalEmail = (adminEmail, username, email) => {
     }
   );
 };
+*/
 
 router.use((req, res, next) => {
   // Only log for specific routes that are failing
@@ -134,6 +137,7 @@ router.use((req, res, next) => {
   next();
 });
 
+/* REFACTORED AS AUTH MIDDLEWARE
 const isAuthenticated = (req, res, next) => {
   console.log("🔍 AUTH CHECK DETAILED:");
   console.log("   Request path:", req.path);
@@ -166,6 +170,7 @@ const isAuthenticated = (req, res, next) => {
     },
   });
 };
+*/
 /* REFACTORED INTO AUTH MODULE
 // POST REGISTER REQUEST
 router.post("/signup", async (req, res) => {

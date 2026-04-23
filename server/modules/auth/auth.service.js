@@ -47,6 +47,11 @@ exports.signup = async ({ username, email, password, role }) => {
   }
 
   if (role === "music_entry_clerk") {
+    await axios.post("http://localhost:10000/api/send-admin-approval-email", {
+        adminEmail: process.env.ADMIN_EMAIL_TEST,
+        username,
+        email,
+    });
     return { message: "Submitted for approval" };
   }
 

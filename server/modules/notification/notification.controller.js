@@ -9,3 +9,12 @@ exports.sendVerificationEmail = async (req, res) => {
     res.status(500).json({ message: "Failed to send email" });
   }
 };
+
+exports.sendAdminApprovalEmail = async (req, res) => {
+  try {
+    await notificationService.sendAdminApprovalEmail(req.body);
+    res.json({ message: "Admin email sent" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send admin email" });
+  }
+};
