@@ -164,7 +164,7 @@ const isAuthenticated = (req, res, next) => {
     },
   });
 };
-
+/* REFACTORED INTO AUTH MODULE
 // POST REGISTER REQUEST
 router.post("/signup", async (req, res) => {
   const { username, email, password, role } = req.body;
@@ -387,6 +387,7 @@ router.get("/logout", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+*/
 
 router.get("/preferences-options", async (req, res) => {
   try {
