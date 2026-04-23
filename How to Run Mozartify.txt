@@ -1,0 +1,13 @@
+How to Run Mozartify:
+
+cd mozartify
+
+npm install
+
+cd server
+npm install
+npm start
+
+# open new terminal
+cd mozartify
+npm run dev

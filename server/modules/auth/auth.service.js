@@ -1,6 +1,7 @@
 const UserModel = require("../../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
 const SALT_ROUNDS = 10;
 
@@ -35,7 +36,13 @@ exports.signup = async ({ username, email, password, role }) => {
       { expiresIn: "1h" }
     );
 
-    // TODO: move email logic later to notification service
+    // CALL notification service
+    await axios.post("http://localhost:10000/api/send-verification-email", {
+      email,
+      username,
+      token,
+    });
+    
     return { message: "Verification email sent", token };
   }
 

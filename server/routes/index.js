@@ -21,6 +21,7 @@ const ArtworkModel = require("../models/Arts");
 const isProduction = process.env.NODE_ENV === "production";
 const router = express.Router();
 
+/* REFACTORED INTO NOTIFICATION
 // ================== EMAIL CONFIGURATION ==================
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -79,6 +80,7 @@ const sendVerificationEmail = (email, username, token) => {
     }
   );
 };
+*/
 
 const sendAdminApprovalEmail = (adminEmail, username, email) => {
   const emailTemplate = `

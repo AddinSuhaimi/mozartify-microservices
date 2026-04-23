@@ -154,7 +154,9 @@ const serverRoutes = require(path.join(__dirname, "routes/server"));
 const inboxRoutes  = require(path.join(__dirname, "routes/inbox"));
   console.log("✅ Inbox routes loaded");
 
+  app.use("/api", require("./modules/notification/notification.routes"));
   app.use("/api", require("./modules/auth/auth.routes"));
+ 
   app.use("/api", indexRoutes);
   app.use("/api", serverRoutes);
 

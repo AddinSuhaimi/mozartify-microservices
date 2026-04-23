@@ -23,7 +23,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "abcjs": "^6.4.4",
     "adm-zip": "^0.5.14",
-    "axios": "^1.7.2",
+    "axios": "^1.15.2",
     "cache-manager": "^6.3.2",
     "cache-manager-mongodb": "^0.3.0",
     "canvas": "^3.0.1",
