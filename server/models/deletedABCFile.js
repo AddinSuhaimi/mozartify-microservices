@@ -310,6 +310,4 @@ const deletedABCFileSchema = new mongoose.Schema({
 
 });
 
-const deletedABCFile = mongoose.model('deletedABCFile', deletedABCFileSchema);
-
-module.exports = deletedABCFile;
+module.exports = mongoose.models.deletedABCFile || mongoose.model('deletedABCFile', deletedABCFileSchema);

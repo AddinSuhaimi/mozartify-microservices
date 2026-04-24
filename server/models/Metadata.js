@@ -14,5 +14,4 @@ const MetadataSchema = new mongoose.Schema({
   filePath: { type: String, required: true },
 }, { timestamps: true });
 
-const Metadata = mongoose.model('Metadata', MetadataSchema);
-module.exports = Metadata;
+module.exports = mongoose.models.Metadata || mongoose.model('Metadata', MetadataSchema);

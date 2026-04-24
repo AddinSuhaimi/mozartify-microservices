@@ -1,0 +1,53 @@
+How to Refactor routers
+
+Example case
+
+router.get("/preferences-options", async (req, res) => {
+  try {
+    const composers = await ABCFileModel.distinct("composer");
+    const genres = await ABCFileModel.distinct("genre");
+    const emotions = await ABCFileModel.distinct("emotion");
+
+    res.status(200).json({ composers, genres, emotions });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch preferences." });
+  }
+});
+
+Refactor to route -> controller -> service -> model
+
+1) MOVE LOGIC TO SERVICE FILE
+
+const ABCFileModel = require("../../models/ABCFile"); <-- require model
+
+exports.getMusicPreferencesOptions = async () => { <-- name based on route name
+// LOGIC
+  const composers = await ABCFileModel.distinct("composer"); 
+  const genres = await ABCFileModel.distinct("genre");
+  const emotions = await ABCFileModel.distinct("emotion");
+
+  return { composers, genres, emotions };
+};
+
+2) HANDLE REQ RES IN CONTROLLER
+
+const userService = require("./user.service"); <-- require service
+
+exports.getMusicPreferencesOptions = async (req, res) => { <-- same name
+  try {
+    const data = await userService.getMusicPreferencesOptions(); <-- await data from service
+    res.status(200).json(data); <-- replace with data
+  } catch (error) {
+    console.error("Error fetching preferences:", error);
+    res.status(500).json({ error: "Failed to fetch preferences." });
+  }
+};
+
+3) CREATE ROUTE
+
+const router = require("express").Router();
+const userController = require("./user.controller"); <-- require controller
+
+router.get("/preferences-options", userController.getMusicPreferencesOptions); <-- route
+
+module.exports = router;

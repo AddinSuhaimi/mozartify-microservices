@@ -1,0 +1,116 @@
+TASKS:
+1. Fix backend architecture (CURRENT PHASE)
+2. Ensure API stability
+3. Fix UI issues (images, styling)
+4. Optimize / polish
+
+PROBLEMS WITH NASIR CODE
+
+1) Routers are not modularized, all are clumped into few files
+
+Problem:
+Most routes are defined inside a few large files (e.g., `index.js`, `server.js`, `admin.js`), where each route handles:
+request handling + business logic + database operations + response formatting
+
+This causes:
+* very large, hard-to-read files (low maintainability)
+* tight coupling between logic and routing
+* duplicated logic across different routes
+* difficult debugging (no clear separation of concerns)
+* high risk of breaking unrelated features during changes
+* poor scalability when adding new features
+
+Solution:
+Refactor into a modular architecture:
+router → controller → service → model
+* Router: defines endpoints and middleware
+* Controller: handles request/response logic
+* Service: contains business logic and data processing
+* Model: handles database schema and queries (Mongoose)
+
+What it does for the system:
+* enforces separation of concerns
+* improves code readability and maintainability
+* allows easier debugging (issues isolated per layer)
+* enables reuse of business logic across endpoints
+* supports incremental migration to microservices
+* makes testing (unit/integration) much easier
+
+2) Some code blocks are using MongoClient while others use Mongoose
+
+Problem:
+The system mixes two different database access approaches:
+MongoClient (native driver)
+Mongoose (ODM with models)
+
+This causes:
+* duplicated database connections
+* inconsistent data handling (raw documents vs schema-based models)
+* lack of validation and schema enforcement in MongoClient usage
+* harder debugging due to mixed paradigms
+* increased complexity in maintaining queries
+* inconsistent coding style across the system
+
+Solution:
+Standardize all database operations using Mongoose models:
+* replace `MongoClient` queries with:
+Model.find()
+Model.findById()
+Model.updateOne()
+Model.findByIdAndUpdate()
+* ensure all collections are accessed through defined schemas
+
+What it does for the system:
+* unifies database access into a single consistent approach
+* ensures schema validation and data integrity
+* reduces duplicate connection handling
+* simplifies query logic and improves readability
+* makes debugging and maintenance easier
+* aligns with modular architecture (service → model pattern)
+
+3) Mongoose Model Re-compilation Error (OverwriteModelError)
+
+Problem:
+When refactoring into modules, multiple files import the same Mongoose model (e.g., `Artwork`, `User`, etc.).
+Mongoose tries to compile the same model multiple times, resulting in:
+
+OverwriteModelError: Cannot overwrite `ModelName` model once compiled
+
+This causes:
+application startup to fail partially
+some modules/routes not being registered
+misleading `404 Route not found` errors
+inconsistent system behavior despite correct routing code
+
+Solution:
+Modify all model exports to reuse existing compiled models instead of redefining them:
+module.exports = mongoose.models.ModelName || mongoose.model("ModelName", schema);
+
+Apply this fix to all models:
+User.js
+Cart.js
+Artwork.js
+ABCFile.js
+Purchase.js
+etc.
+
+What it does for the system:
+* prevents duplicate model compilation
+* ensures all modules can safely import shared models
+* allows full application initialization without crashes
+* guarantees all routes are properly registered
+* eliminates false 404 errors caused by incomplete startup
+* stabilizes the modular architecture
+
+The issue was not a routing problem, but a startup failure:
+
+Model error → app initialization breaks → routes not registered → 404 errors
+
+Fixing the model handling restored:
+
+✔ full server startup  
+✔ proper route registration  
+✔ consistent API behavior  
+
+Before fix: App starts → loads routes → hits model error → crashes mid-initialization → some routes never get registered → 404 everywhere
+After fix: App starts → loads all models successfully → registers ALL routes → requests now match routes → no more 404

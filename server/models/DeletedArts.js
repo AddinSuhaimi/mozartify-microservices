@@ -12,6 +12,4 @@ const DeletedArtworkSchema = new mongoose.Schema({
   deletedAt: { type: Date, default: Date.now }, 
 });
 
-const DeletedArtwork = mongoose.model("DeletedArtwork", DeletedArtworkSchema);
-
-module.exports = DeletedArtwork;
+module.exports = mongoose.models.DeletedArtwork || mongoose.model("DeletedArtwork", DeletedArtworkSchema);

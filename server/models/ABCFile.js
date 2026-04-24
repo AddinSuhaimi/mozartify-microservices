@@ -312,6 +312,4 @@ const ABCFileSchema = new mongoose.Schema({
   
 
 
-const ABCFile = mongoose.model('ABCFile', ABCFileSchema);
-
-module.exports = ABCFile;
+module.exports = mongoose.models.ABCFile || mongoose.model('ABCFile', ABCFileSchema);

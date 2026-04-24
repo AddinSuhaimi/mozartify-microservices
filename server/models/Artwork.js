@@ -23,5 +23,4 @@ const ArtworkSchema = new mongoose.Schema({
   downloads: { type: Number, required: false},
 });
 
-const ArtworkModel = mongoose.model("Artwork", ArtworkSchema, "artworks");
-module.exports = ArtworkModel;
+module.exports = mongoose.models.Artwork || mongoose.model("Artwork", ArtworkSchema, "artworks");

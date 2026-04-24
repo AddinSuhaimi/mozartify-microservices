@@ -30,4 +30,4 @@ const musicTabSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('MusicTab', musicTabSchema);
+module.exports = mongoose.models.MusicTab || mongoose.model('MusicTab', musicTabSchema);

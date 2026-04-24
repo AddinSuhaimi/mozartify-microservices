@@ -44,3 +44,19 @@ exports.logout = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getCurrentUser = async (req, res) => {
+  try {    
+    const userId = req.session.userId;
+    const user = await authService.getCurrentUser(userId);
+    res.status(200).json(user);
+  } catch (err) {
+    console.error("Error fetching current user:", err.message);
+
+    if (err.message === "User not found") {
+      return res.status(404).json({ error: err.message });
+    }
+
+    res.status(500).json({ error: "Server error" });
+  }
+};

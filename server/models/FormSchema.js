@@ -162,6 +162,4 @@ formConfigSchema.statics.createInitialSchema = async function(initialConfig) {
   return exists;
 };
 
-const FormConfig = mongoose.model('FormConfig', formConfigSchema);
-
-module.exports = FormConfig;
+module.exports = mongoose.models.FormConfig || mongoose.model('FormConfig', formConfigSchema);

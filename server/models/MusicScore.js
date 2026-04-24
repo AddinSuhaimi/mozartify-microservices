@@ -76,6 +76,4 @@ const MusicScoreSchema = new mongoose.Schema({
   }],
 });
 
-const MusicScore = mongoose.model('MusicScore', MusicScoreSchema);
-
-module.exports = MusicScore;
+module.exports = mongoose.models.MusicScore ||mongoose.model('MusicScore', MusicScoreSchema);

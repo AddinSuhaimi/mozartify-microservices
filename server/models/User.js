@@ -39,6 +39,4 @@ const UserSchema = new mongoose.Schema({
   created_art_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Art' }]
 });
 
-const UserModel = mongoose.model("User", UserSchema);
-
-module.exports = UserModel;
+module.exports = mongoose.models.User || mongoose.model("User", UserSchema);

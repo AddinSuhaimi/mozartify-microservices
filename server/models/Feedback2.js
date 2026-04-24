@@ -46,4 +46,4 @@ const feedback2Schema = new mongoose.Schema({
   replies: [replySchema]
 });
 
-module.exports = mongoose.model('Feedback2', feedback2Schema, 'feedbacks2');
+module.exports = mongoose.models.Feedback2 || mongoose.model('Feedback2', feedback2Schema, 'feedbacks2');

@@ -30,4 +30,4 @@ const artsTabSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('ArtsTab', artsTabSchema);
+module.exports = mongoose.models.ArtsTab || mongoose.model('ArtsTab', artsTabSchema);

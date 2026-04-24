@@ -78,4 +78,4 @@ const DynamicFieldSchema = new mongoose.Schema({
 // Create a text index for searching
 DynamicFieldSchema.index({ name: 'text', label: 'text' });
 
-module.exports = mongoose.model('DynamicField', DynamicFieldSchema);
+module.exports = mongoose.models.DynamicField || mongoose.model('DynamicField', DynamicFieldSchema);

@@ -14,5 +14,4 @@ const DeletedUserSchema = new mongoose.Schema({
   deletedAt: { type: Date, default: Date.now },
 });
 
-const DeletedUserModel = mongoose.model('DeletedUser', DeletedUserSchema);
-module.exports = DeletedUserModel;
+module.exports = mongoose.models.DeletedUser || mongoose.model('DeletedUser', DeletedUserSchema);

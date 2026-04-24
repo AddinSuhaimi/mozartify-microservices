@@ -27,6 +27,4 @@ ArtworkSchema.pre('save', function(next) {
   next();
 });
 
-const Artwork = mongoose.model("Artwork", ArtworkSchema, "artworks");
-
-module.exports = Artwork;
+module.exports = mongoose.models.Artwork || mongoose.model("Artwork", ArtworkSchema, "artworks");

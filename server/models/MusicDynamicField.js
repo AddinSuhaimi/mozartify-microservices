@@ -78,4 +78,4 @@ const musicDynamicFieldSchema = new mongoose.Schema({
 // Create a text index for searching
 musicDynamicFieldSchema.index({ name: 'text', label: 'text' });
 
-module.exports = mongoose.model('MusicDynamicField', musicDynamicFieldSchema);
+module.exports = mongoose.models.MusicDynamicField || mongoose.model('MusicDynamicField', musicDynamicFieldSchema);

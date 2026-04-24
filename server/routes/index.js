@@ -395,7 +395,7 @@ router.get("/logout", async (req, res) => {
   }
 });
 */
-
+/*REFACTORED INTO USER MODULE
 router.get("/preferences-options", async (req, res) => {
   try {
     const composers = await ABCFileModel.distinct("composer");
@@ -512,7 +512,7 @@ router.post("/art-preferences", async (req, res) => {
     }
   }
 });
-
+*/
 router.get("/refine-search", async (req, res) => {
   try {
     const composers = await ABCFileModel.distinct("composer");
@@ -1360,7 +1360,7 @@ router.get("/user-artwork-purchases", async (req, res) => {
     res.status(500).send("Error fetching purchases for the user.");
   }
 });
-
+//refactored
 router.get("/user-cart", async (req, res) => {
   try {
     const userId = req.session.userId;
