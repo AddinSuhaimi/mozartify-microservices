@@ -60,3 +60,61 @@ exports.getCurrentUser = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    await authService.forgotPassword(email);
+
+    res.status(200).json({
+      message: "Password reset link sent to your email",
+    });
+  } catch (err) {
+    console.error("Forgot password error:", err.message);
+
+    if (err.message === "Invalid email format") {
+      return res.status(400).json({ message: err.message });
+    }
+
+    if (err.message === "Email not found") {
+      return res.status(400).json({ message: err.message });
+    }
+
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    await authService.resetPassword(token, newPassword);
+
+    res.status(200).json({
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    console.error("Reset password error:", err.message);
+
+    if (
+      err.message === "Invalid or expired token" ||
+      err.message === "Token has expired" ||
+      err.message === "Invalid token"
+    ) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    if (err.message === "Invalid password format") {
+      return res.status(400).json({ message: err.message });
+    }
+
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};

@@ -513,6 +513,7 @@ router.post("/art-preferences", async (req, res) => {
   }
 });
 */
+/* REFACTORED INTO MUSIC AND ARTS MODULES
 router.get("/refine-search", async (req, res) => {
   try {
     const composers = await ABCFileModel.distinct("composer");
@@ -566,7 +567,8 @@ router.get("/artwork-refine-search", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch preferences." });
   }
 });
-
+*/
+/* REFACTORED INTO AUTH MODULE
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
@@ -673,7 +675,7 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
-
+*/
 router.delete("/user/delete", async (req, res) => {
   const userId = req.session.userId;
 
@@ -844,7 +846,7 @@ router.put("/user/update-profile-picture", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
-
+/* REFACTORED TO AUTH MODULE
 router.get("/current-user", isAuthenticated, (req, res) => {
   UserModel.findById(req.session.userId)
     .then((user) => {
@@ -857,7 +859,7 @@ router.get("/current-user", isAuthenticated, (req, res) => {
       res.status(500).json({ message: "Server error", error: err });
     });
 });
-
+*/
 // router.delete("/user/delete", async (req, res) => {
 //   const userId = req.session.userId;
 
