@@ -347,7 +347,7 @@ export default function MusicEntryClerkHomepage() {
       const fetchSearchedScores = async () => {
         try {
           const response = await axios.get(
-            `${API_BASE_URL}/search-music-scores`,
+            `${API_BASE_URL}/music-search`,
             {
               params: { query: searchQuery },
             }

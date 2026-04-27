@@ -107,10 +107,79 @@ The issue was not a routing problem, but a startup failure:
 Model error → app initialization breaks → routes not registered → 404 errors
 
 Fixing the model handling restored:
-
-✔ full server startup  
-✔ proper route registration  
-✔ consistent API behavior  
+full server startup  
+proper route registration  
+onsistent API behavior  
 
 Before fix: App starts → loads routes → hits model error → crashes mid-initialization → some routes never get registered → 404 everywhere
 After fix: App starts → loads all models successfully → registers ALL routes → requests now match routes → no more 404
+
+4) Duplicate and fragmented search endpoints with inconsistent request handling
+
+Problem:
+The system originally implemented multiple search-related endpoints with overlapping functionality:
+/search-music-scores
+/advanced-search
+/search
+
+These endpoints:
+* duplicate query-building logic
+* handle similar filtering in different ways
+* use inconsistent request formats (GET with query params vs POST with body)
+* increase maintenance complexity (same logic repeated in multiple places)
+* create confusion for frontend integration (multiple endpoints for the same feature)
+
+This leads to poor API design, where a single resource (search) is unnecessarily split across multiple endpoints instead of being unified.
+
+Solution:
+Consolidate all search functionality into a **single endpoint per domain**, and standardize request handling:
+POST /api/search-music
+
+Refactor architecture into:
+router → controller → service → query builder
+* unify simple search (keyword) and advanced search (filters, combinedQueries)
+* centralize query logic into a reusable **query builder function**
+* standardize all inputs to be passed through **request body (POST)** instead of mixing query params and body
+
+What it does for the system:
+* eliminates duplicated logic across multiple endpoints
+* enforces consistent API usage
+* simplifies frontend integration (one endpoint instead of many)
+* improves maintainability (single source of truth)
+* enables easier debugging and testing
+* prepares the system for scalability (pagination, sorting, ranking)
+
+Sidenote: Debugging GET → POST and params misuse
+
+During refactoring, an issue was encountered where:
+Search API returned results but did not apply filtering
+
+Root cause:
+* frontend was still sending data using:
+axios.post(url, {
+  params: { query: searchQuery }
+});
+
+This resulted in:
+req.body = { params: { query: "..." } }
+
+while backend expected:
+req.body.query
+
+Additionally, the original implementation used:
+GET → req.query
+
+but the refactored API used:
+POST → req.body
+
+Fix applied:
+axios.post(url, {
+  query: searchQuery
+});
+
+GET → use req.query (URL parameters)
+POST → use req.body (request payload)
+
+Mixing these incorrectly can cause:
+* filters not being applied
+* silent logic failures (no errors, but incorrect results)

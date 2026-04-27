@@ -346,10 +346,10 @@ export default function AdminManageScores() {
     if (searchQuery) {
       const fetchSearchedScores = async () => {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/search-music-scores`,
-            {
-              params: { query: searchQuery },
+          const response = await axios.post(
+            `${API_BASE_URL}/search-music`,
+            { 
+              query: searchQuery 
             }
           );
           setUnfilteredSearchedScores(response.data);
