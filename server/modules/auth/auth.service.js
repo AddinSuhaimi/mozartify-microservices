@@ -240,3 +240,18 @@ exports.resetPassword = async (token, newPassword) => {
   user.password = hashedPassword;
   await user.save();
 };
+
+exports.clearSession = (req) => {
+  return new Promise((resolve, reject) => {
+    if (!req.session) {
+      return resolve(); // no session is fine
+    }
+
+    req.session.destroy((err) => {
+      if (err) {
+        return reject(new Error("Failed to destroy session"));
+      }
+      resolve();
+    });
+  });
+};

@@ -118,3 +118,20 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+
+exports.clearSession = async (req, res) => {
+  try {
+    await authService.clearSession(req);
+
+    res.status(200).json({
+      message: "Session cleared",
+    });
+  } catch (err) {
+    console.error("Clear session error:", err.message);
+
+    res.status(500).json({
+      message: "Failed to clear session",
+      error: err.message,
+    });
+  }
+};

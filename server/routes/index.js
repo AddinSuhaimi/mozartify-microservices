@@ -676,6 +676,7 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 */
+/* REFACTORED INTO USER MODULE
 router.delete("/user/delete", async (req, res) => {
   const userId = req.session.userId;
 
@@ -710,7 +711,8 @@ router.delete("/user/delete", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-
+*/
+/* REFACTORED INTO AUTH MODULE
 router.get("/clearSession", (req, res) => {
   if (req.session) {
     req.session.destroy((err) => {
@@ -725,7 +727,8 @@ router.get("/clearSession", (req, res) => {
     res.json({ message: "No active session to clear" });
   }
 });
-
+*/
+/* REFACTORED INTO USER MODULE
 // Update username only
 router.put("/user/update-username", async (req, res) => {
   const { username } = req.body;
@@ -846,6 +849,7 @@ router.put("/user/update-profile-picture", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+*/
 /* REFACTORED TO AUTH MODULE
 router.get("/current-user", isAuthenticated, (req, res) => {
   UserModel.findById(req.session.userId)

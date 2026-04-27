@@ -77,3 +77,107 @@ exports.getUserCart = async (req, res) => {
     });
   }
 };
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    await userService.deleteUser(userId);
+
+    res.status(200).json({
+      message: "Account deleted successfully",
+    });
+  } catch (err) {
+    console.error("Delete user error:", err.message);
+
+    if (err.message === "User not found") {
+      return res.status(404).json({ message: err.message });
+    }
+
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+exports.updateUsername = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { username } = req.body;
+
+    const updatedUser = await userService.updateUsername(userId, username);
+
+    res.status(200).json({
+      message: "Username updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("Update username error:", err.message);
+
+    if (err.message === "User not found") {
+      return res.status(404).json({ message: err.message });
+    }
+
+    if (err.message === "Username already taken") {
+      return res.status(400).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    await userService.changePassword(userId, currentPassword, newPassword);
+
+    res.status(200).json({
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    console.error("Change password error:", err.message);
+
+    if (
+      err.message === "User not found" ||
+      err.message === "Current password is incorrect"
+    ) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    if (err.message === "Invalid password format") {
+      return res.status(400).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+exports.updateProfilePicture = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { profile_picture_url } = req.body;
+
+    const updatedUser = await userService.updateProfilePicture(
+      userId,
+      profile_picture_url
+    );
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("Update profile picture error:", err.message);
+
+    if (err.message === "User not found") {
+      return res.status(404).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

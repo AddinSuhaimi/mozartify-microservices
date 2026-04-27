@@ -8,5 +8,9 @@ router.get("/art-preferences-options", userController.getArtPreferencesOptions);
 router.post("/preferences", isAuthenticated, userController.updateMusicPreferences);
 router.post("/art-preferences", isAuthenticated, userController.updateArtPreferences);
 router.get("/user-cart", isAuthenticated, userController.getUserCart);
+router.delete("/user/delete", isAuthenticated, userController.deleteUser);
+router.put("/user/update-username", isAuthenticated, userController.updateUsername);
+router.put("/user/change-password", isAuthenticated, userController.changePassword);
+router.put("/user/update-profile-picture", isAuthenticated, userController.updateProfilePicture);
 
 module.exports = router;
