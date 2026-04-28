@@ -882,7 +882,7 @@ router.get("/current-user", isAuthenticated, (req, res) => {
 //     res.status(500).json({ message: "Server error", error: err });
 //   }
 // });
-/*
+/* REFACTORED INTO MUSIC AND ARTS MODULEs
 router.get("/search-music-scores", async (req, res) => {
   const { query } = req.query;
 
@@ -907,7 +907,7 @@ router.get("/search-music-scores", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-*/
+
 router.get("/search-artworks", async (req, res) => {
   const { query } = req.query;
 
@@ -929,7 +929,7 @@ router.get("/search-artworks", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-/*
+
 router.post("/advanced-search", async (req, res) => {
   const { combinedQueries, selectedCollection } = req.body;
 
@@ -1014,7 +1014,7 @@ router.post("/advanced-search", async (req, res) => {
     res.status(500).json({ error: "Failed to search music scores" });
   }
 });
-*/
+
 router.post("/artwork-advanced-search", async (req, res) => {
   const { combinedQueries, selectedCollection } = req.body;
 
@@ -1090,7 +1090,7 @@ router.post("/artwork-advanced-search", async (req, res) => {
     res.status(500).json({ error: "Failed to search artworks" });
   }
 });
-/*
+
 router.post("/search", async (req, res) => {
   const { combinedQueries, selectedCollection } = req.body;
 
@@ -1163,7 +1163,7 @@ router.post("/search", async (req, res) => {
     res.status(500).json({ error: "Failed to search music scores" });
   }
 });
-*/
+
 router.post("/artwork-search", async (req, res) => {
   const { combinedQueries, selectedCollection } = req.body;
 
@@ -1236,7 +1236,8 @@ router.post("/artwork-search", async (req, res) => {
     res.status(500).json({ error: "Failed to search artworks." });
   }
 });
-
+*/
+/*
 router.get("/filter-music-scores", async (req, res) => {
   const { genre, composer, emotion, instrumentation } = req.query;
 
@@ -1266,7 +1267,8 @@ router.get("/filter-music-scores", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-
+*/
+/*
 router.get("/filter-artworks", async (req, res) => {
   try {
     const filter = {};
@@ -1287,7 +1289,7 @@ router.get("/filter-artworks", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-
+*/
 router.post("/check-purchase", async (req, res) => {
   try {
     const { score_id, user_id } = req.body;

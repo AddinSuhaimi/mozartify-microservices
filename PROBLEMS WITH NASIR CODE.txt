@@ -1,40 +1,40 @@
 TASKS:
 1. Fix backend architecture (CURRENT PHASE)
 2. Ensure API stability
-3. Fix UI issues (images, styling)
+3. Fix UI issues
 4. Optimize / polish
 
 PROBLEMS WITH NASIR CODE
 
-1) Routers are not modularized, all are clumped into few files
+1) API endpoints are not modularized, all are clumped into few files
 
 Problem:
 Most routes are defined inside a few large files (e.g., `index.js`, `server.js`, `admin.js`), where each route handles:
 request handling + business logic + database operations + response formatting
 
 This causes:
-* very large, hard-to-read files (low maintainability)
-* tight coupling between logic and routing
-* duplicated logic across different routes
-* difficult debugging (no clear separation of concerns)
-* high risk of breaking unrelated features during changes
-* poor scalability when adding new features
+- very large, hard-to-read files
+- tight coupling between logic and routing
+- duplicated logic across different routes
+- difficult debugging, no clear separation of concerns
+- high risk of breaking unrelated features during changes
+- poor scalability when adding new features
 
 Solution:
 Refactor into a modular architecture:
 router → controller → service → model
-* Router: defines endpoints and middleware
-* Controller: handles request/response logic
-* Service: contains business logic and data processing
-* Model: handles database schema and queries (Mongoose)
+- Router: defines endpoints and middleware
+- Controller: handles request/response logic
+- Service: contains business logic and data processing
+- Model: handles database schema and queries (Mongoose)
 
-What it does for the system:
-* enforces separation of concerns
-* improves code readability and maintainability
-* allows easier debugging (issues isolated per layer)
-* enables reuse of business logic across endpoints
-* supports incremental migration to microservices
-* makes testing (unit/integration) much easier
+Modules:
+auth - authentication & session management
+user - user data & profile management
+music - music score domain
+arts - artwork domain
+notification - user notifications & inbox
+payment - transactions & purchases
 
 2) Some code blocks are using MongoClient while others use Mongoose
 
@@ -44,29 +44,28 @@ MongoClient (native driver)
 Mongoose (ODM with models)
 
 This causes:
-* duplicated database connections
-* inconsistent data handling (raw documents vs schema-based models)
-* lack of validation and schema enforcement in MongoClient usage
-* harder debugging due to mixed paradigms
-* increased complexity in maintaining queries
-* inconsistent coding style across the system
+- duplicated database connections
+- inconsistent data handling (raw documents vs schema-based models)
+- lack of validation and schema enforcement in MongoClient usage
+- harder debugging due to mixed paradigms
+- increased complexity in maintaining queries
+- inconsistent coding style across the system
 
 Solution:
 Standardize all database operations using Mongoose models:
-* replace `MongoClient` queries with:
+- replace `MongoClient` queries with:
 Model.find()
 Model.findById()
 Model.updateOne()
 Model.findByIdAndUpdate()
-* ensure all collections are accessed through defined schemas
+- ensure all collections are accessed through defined schemas
 
 What it does for the system:
-* unifies database access into a single consistent approach
-* ensures schema validation and data integrity
-* reduces duplicate connection handling
-* simplifies query logic and improves readability
-* makes debugging and maintenance easier
-* aligns with modular architecture (service → model pattern)
+- unifies database access into a single consistent approach
+- ensures schema validation and data integrity
+- reduces duplicate connection handling
+- simplifies query logic and improves readability
+- makes debugging and maintenance easier
 
 3) Mongoose Model Re-compilation Error (OverwriteModelError)
 
@@ -77,10 +76,10 @@ Mongoose tries to compile the same model multiple times, resulting in:
 OverwriteModelError: Cannot overwrite `ModelName` model once compiled
 
 This causes:
-application startup to fail partially
-some modules/routes not being registered
-misleading `404 Route not found` errors
-inconsistent system behavior despite correct routing code
+- application startup to fail partially
+- some modules/routes not being registered
+- misleading `404 Route not found` errors
+- inconsistent system behavior despite correct routing code
 
 Solution:
 Modify all model exports to reuse existing compiled models instead of redefining them:
@@ -92,15 +91,15 @@ Cart.js
 Artwork.js
 ABCFile.js
 Purchase.js
-etc.
+...
 
 What it does for the system:
-* prevents duplicate model compilation
-* ensures all modules can safely import shared models
-* allows full application initialization without crashes
-* guarantees all routes are properly registered
-* eliminates false 404 errors caused by incomplete startup
-* stabilizes the modular architecture
+- prevents duplicate model compilation
+- ensures all modules can safely import shared models
+- allows full application initialization without crashes
+- guarantees all routes are properly registered
+- eliminates false 404 errors caused by incomplete startup
+- stabilizes the modular architecture
 
 The issue was not a routing problem, but a startup failure:
 
@@ -123,11 +122,11 @@ The system originally implemented multiple search-related endpoints with overlap
 /search
 
 These endpoints:
-* duplicate query-building logic
-* handle similar filtering in different ways
-* use inconsistent request formats (GET with query params vs POST with body)
-* increase maintenance complexity (same logic repeated in multiple places)
-* create confusion for frontend integration (multiple endpoints for the same feature)
+- duplicate query-building logic
+- handle similar filtering in different ways
+- use inconsistent request formats (GET with query params vs POST with body)
+- increase maintenance complexity (same logic repeated in multiple places)
+- create confusion for frontend integration (multiple endpoints for the same feature)
 
 This leads to poor API design, where a single resource (search) is unnecessarily split across multiple endpoints instead of being unified.
 
@@ -137,17 +136,9 @@ POST /api/search-music
 
 Refactor architecture into:
 router → controller → service → query builder
-* unify simple search (keyword) and advanced search (filters, combinedQueries)
-* centralize query logic into a reusable **query builder function**
-* standardize all inputs to be passed through **request body (POST)** instead of mixing query params and body
-
-What it does for the system:
-* eliminates duplicated logic across multiple endpoints
-* enforces consistent API usage
-* simplifies frontend integration (one endpoint instead of many)
-* improves maintainability (single source of truth)
-* enables easier debugging and testing
-* prepares the system for scalability (pagination, sorting, ranking)
+- unify simple search (keyword) and advanced search (filters, combinedQueries)
+- centralize query logic into a reusable **query builder function**
+- standardize all inputs to be passed through **request body (POST)** instead of mixing query params and body
 
 Sidenote: Debugging GET → POST and params misuse
 
@@ -155,7 +146,7 @@ During refactoring, an issue was encountered where:
 Search API returned results but did not apply filtering
 
 Root cause:
-* frontend was still sending data using:
+- frontend was still sending data using:
 axios.post(url, {
   params: { query: searchQuery }
 });
@@ -181,5 +172,27 @@ GET → use req.query (URL parameters)
 POST → use req.body (request payload)
 
 Mixing these incorrectly can cause:
-* filters not being applied
-* silent logic failures (no errors, but incorrect results)
+- filters not being applied
+- silent logic failures (no errors, but incorrect results)
+
+5) Separate filter endpoint causing duplicated logic and inconsistent data flow
+
+Problem:
+Filter functionality was implemented as a separate endpoint:
+/filter-music-scores
+
+This caused:
+- duplicated filtering logic (backend + frontend `applyFilters`)
+- inconsistent behavior (sometimes backend filter, sometimes frontend filter)
+- tight coupling between UI state and filtering logic
+- unnecessary API fragmentation (search vs filter treated differently)
+
+Solution:
+Merge filter logic into the unified search endpoint:
+POST /api/search-music
+
+Pass filters via request body:
+{ query, filters, combinedQueries }
+- remove `/filter-music-scores` endpoint
+- remove frontend `applyFilters` logic
+- centralize all filtering in backend query builder

@@ -233,10 +233,10 @@ export default function CustomerHomepage2() {
     if (searchQuery) {
       const fetchSearchedArtworks = async () => {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/search-artworks`,
+          const response = await axios.post(
+            `${API_BASE_URL}/search-artwork`,
             {
-              params: { query: searchQuery },
+              query: searchQuery
             }
           );
           setUnfilteredSearchedArtworks(response.data);
@@ -273,25 +273,16 @@ export default function CustomerHomepage2() {
     setIsFiltered(true);
 
     try {
-      if (!searchQuery) {
-        // Fetch from backend
-        const response = await axios.get(
-         `${API_BASE_URL}/filter-artworks`,
-          {
-            params: selectedFilters,
-          }
-        );
-        setFilteredArtworks(response.data);
-      } else {
-        // Filter client-side
-        const filtered = searchedArtworks.filter((item) =>
-          Object.entries(selectedFilters).every(([field, values]) => {
-            if (!values.length) return true;
-            return values.includes(item[field]);
-          })
-        );
-        setSearchedArtworks(filtered);
-      }
+      const response = await axios.post(
+        `${API_BASE_URL}/search-artwork`,
+        {
+          query: searchQuery || "",   // ✅ include search if exists
+          filters: selectedFilters,  // ✅ pass filters directly
+        }
+      );
+
+      setFilteredArtworks(response.data);
+      setSearchedArtworks(response.data); // keep UI consistent
     } catch (error) {
       console.error("Error applying filters:", error);
     }

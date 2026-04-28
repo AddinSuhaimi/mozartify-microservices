@@ -447,29 +447,28 @@ export default function MusicEntryClerkHomepage() {
 
     if (hasFilter) {
       setIsFiltered(true);
+
       try {
-        if (searchQuery) {
-          // Apply filters to search results
-          const filteredSearchResults = applyFilters(unfilteredSearchedScores);
-          setSearchedScores(filteredSearchResults);
-        } else {
-          // Apply filters to all scores
-          const response = await axios.get(
-            `${API_BASE_URL}/filter-music-scores`,
-            {
-              params: { genre, composer, instrumentation, emotion },
-            }
-          );
-          setFilteredScores(response.data);
-        }
+        const response = await axios.post(
+          `${API_BASE_URL}/search-music`,
+          {
+            query: searchQuery || "", // include search if exists
+            filters: {
+              genre,
+              composer,
+              instrumentation,
+              emotion,
+            },
+          }
+        );
+
+        setFilteredScores(response.data);
+        setSearchedScores(response.data); // optional depending on your state usage
       } catch (error) {
         console.error("Error fetching filtered scores:", error);
       }
     } else {
       setIsFiltered(false);
-      if (searchQuery) {
-        setSearchedScores(unfilteredSearchedScores);
-      }
     }
   };
 

@@ -275,18 +275,21 @@ export default function CustomerHomepage() {
       setIsFiltered(true);
 
       try {
-        if (!searchQuery) {
-          const response = await axios.get(
-            `${API_BASE_URL}/filter-music-scores`,
-            {
-              params: { genre, composer, instrumentation, emotion },
-            }
-          );
-          setFilteredScores(response.data);
-        } else {
-          const filteredSearchResults = applyFilters(searchedScores);
-          setSearchedScores(filteredSearchResults);
-        }
+        const response = await axios.post(
+          `${API_BASE_URL}/search-music`,
+          {
+            query: searchQuery || "", // include search if exists
+            filters: {
+              genre,
+              composer,
+              instrumentation,
+              emotion,
+            },
+          }
+        );
+
+        setFilteredScores(response.data);
+        setSearchedScores(response.data); // optional depending on your state usage
       } catch (error) {
         console.error("Error fetching filtered scores:", error);
       }

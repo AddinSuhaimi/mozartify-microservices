@@ -1,11 +1,10 @@
 const ABCFileModel = require("../../models/ABCFile");
 
-const buildMusicQuery = (combinedQueries, selectedCollection, queryText) => {
-  let query = {};
+const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
   let conditions = [];
 
   // simple search
-  if (queryText) {
+  if (queryText && queryText.trim() !== "") {
     conditions.push({
       $or: [
         { title: { $regex: queryText, $options: "i" } },
@@ -45,6 +44,33 @@ const buildMusicQuery = (combinedQueries, selectedCollection, queryText) => {
     });
   }
 
+  // filters
+  if (filters) {
+    const { genre, composer, instrumentation, emotion } = filters;
+
+    if (genre) {
+      conditions.push({ genre });
+    }
+
+    if (composer) {
+      conditions.push({
+        composer: { $regex: composer, $options: "i" },
+      });
+    }
+
+    if (instrumentation) {
+      conditions.push({
+        instrumentation: { $regex: instrumentation, $options: "i" },
+      });
+    }
+
+    if (emotion) {
+      conditions.push({
+        emotion: { $regex: emotion, $options: "i" },
+      });
+    }
+  }
+
   if (selectedCollection && selectedCollection !== "All") {
     conditions.push({ collection: selectedCollection });
   }
@@ -65,12 +91,13 @@ exports.getMusicRefineSearch = async () => {
 };
 
 exports.searchMusic = async (body) => {
-  const { combinedQueries, selectedCollection, query: queryText } = body;
+  const { combinedQueries, selectedCollection, query: queryText, filters } = body;
 
   const mongoQuery = buildMusicQuery(
     combinedQueries,
     selectedCollection,
-    queryText
+    queryText,
+    filters
   );
 
   return await ABCFileModel.find(mongoQuery);

@@ -9,3 +9,13 @@ exports.getArtworkRefineSearch = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch artwork filters." });
   }
 };
+
+exports.searchArtwork = async (req, res) => {
+  try {
+    const results = await artsService.searchArtwork(req.body);
+    res.status(200).json(results);
+  } catch (err) {
+    console.error("Artwork search error:", err);
+    res.status(500).json({ error: "Failed to search artworks" });
+  }
+};
