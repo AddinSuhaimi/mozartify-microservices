@@ -1372,7 +1372,7 @@ router.get("/user-artwork-purchases", async (req, res) => {
   }
 });
 */
-//refactored
+/* REFACTORED INTO MUSIC AND ARTS MODULES
 router.get("/user-cart", async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -1412,7 +1412,7 @@ router.get("/user-artwork-cart", async (req, res) => {
     res.status(500).send("Error fetching cart items for the user.");
   }
 });
-
+*/
 // Get artwork by ID
 router.get("/fetchArts/:id", async (req, res) => {
   try {

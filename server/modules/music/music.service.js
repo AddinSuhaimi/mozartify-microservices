@@ -1,4 +1,5 @@
 const ABCFileModel = require("../../models/ABCFile");
+const CartModel = require("../../models/Cart");
 
 const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
   let conditions = [];
@@ -116,4 +117,16 @@ exports.checkPurchase = async ({ score_id, user_id }) => {
   } else {
     return { exists: false, data: [] };
   }
+};
+
+exports.getUserMusicCart = async (userId) => {
+  const cart = await CartModel.findOne({ user_id: userId });
+
+  if (!cart || cart.score_ids.length === 0) {
+    return [];
+  }
+
+  return cart.score_ids.map((scoreId) => ({
+    score_id: scoreId,
+  }));
 };

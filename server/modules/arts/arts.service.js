@@ -1,4 +1,5 @@
 const ArtworkModel = require("../../models/Artwork");
+const Cart2Model = require("../../models/Cart2");
 
 exports.getArtworkRefineSearch = async () => {
   const sample = await ArtworkModel.findOne().lean();
@@ -128,4 +129,16 @@ exports.searchArtwork = async (body) => {
   );
 
   return await ArtworkModel.find(mongoQuery);
+};
+
+exports.getUserArtworkCart = async (userId) => {
+  const cart = await Cart2Model.findOne({ user_id: userId });
+
+  if (!cart || cart.artwork_ids.length === 0) {
+    return [];
+  }
+
+  return cart.artwork_ids.map((artworkId) => ({
+    artwork_id: artworkId,
+  }));
 };

@@ -30,3 +30,16 @@ exports.checkPurchase = async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
+exports.getUserMusicCart = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const cartItems = await musicService.getUserMusicCart(userId);
+
+    res.status(200).json(cartItems);
+  } catch (error) {
+    console.error("Error fetching music cart:", error.message);
+    res.status(500).json({ error: "Failed to fetch music cart" });
+  }
+};
