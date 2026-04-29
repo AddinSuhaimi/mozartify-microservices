@@ -8,6 +8,14 @@ const bcrypt = require("bcryptjs");
 
 const SALT_ROUNDS = 10;
 
+// Import payment service for querying purchases
+let paymentService;
+try {
+  paymentService = require("../payment/payment.service");
+} catch (err) {
+  console.warn("Payment service not available");
+}
+
 exports.getMusicPreferencesOptions = async () => {
     const composers = await ABCFileModel.distinct("composer");
     const genres = await ABCFileModel.distinct("genre");
@@ -84,6 +92,50 @@ exports.getUserCart = async (userId) => {
   }));
 
   return cartItems;
+};
+
+exports.getUserLibrary = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  if (!paymentService) {
+    throw new Error("Payment service not available");
+  }
+
+  // Get purchases from payment service (source of truth)
+  const purchases = await paymentService.getUserPurchases(userId);
+
+  // Optionally enrich with music/score data
+  if (purchases.length > 0) {
+    const scoreIds = purchases.map(p => p.score_id);
+    const scores = await ABCFileModel.find({ _id: { $in: scoreIds } });
+    return { purchases, scores };
+  }
+
+  return { purchases: [], scores: [] };
+};
+
+exports.getUserArtworkLibrary = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  if (!paymentService) {
+    throw new Error("Payment service not available");
+  }
+
+  // Get artwork purchases from payment service (source of truth)
+  const purchases = await paymentService.getUserArtworkPurchases(userId);
+
+  // Optionally enrich with artwork data
+  if (purchases.length > 0) {
+    const artworkIds = purchases.map(p => p.artwork_id);
+    const artworks = await ArtworkModel.find({ _id: { $in: artworkIds } });
+    return { purchases, artworks };
+  }
+
+  return { purchases: [], artworks: [] };
 };
 
 exports.deleteUser = async (userId) => {

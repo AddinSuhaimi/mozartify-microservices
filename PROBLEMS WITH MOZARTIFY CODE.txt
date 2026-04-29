@@ -1,10 +1,16 @@
-TASKS:
-1. Fix backend architecture (CURRENT PHASE)
-2. Ensure API stability
-3. Fix UI issues
-4. Optimize / polish
+Phase 1 (now)
+- modular monolith
+- clean architecture
+- add recommendation service
+Phase 2
+- split into microservices
+- add service calls
+Phase 3
+- deploy as pods
+- introduce artificial dependencies
+- test scheduling
 
-PROBLEMS WITH NASIR CODE
+PROBLEMS WITH MOZARTIFY CODE
 
 1) API endpoints are not modularized, all are clumped into few files
 
@@ -196,3 +202,42 @@ Pass filters via request body:
 - remove `/filter-music-scores` endpoint
 - remove frontend `applyFilters` logic
 - centralize all filtering in backend query builder
+
+6) Misplaced ownership of purchase data (user module vs payment domain)
+
+Problem:
+Purchase-related endpoints were initially handled within the user context (e.g. `/user-purchases`), even though purchase data originates from transactions:
+/user-purchases
+/user-artwork-purchases
+
+This caused:
+- blurred responsibility between user and payment domains
+- tight coupling of user module with transactional logic
+- risk of creating a “god module” (user handling too many concerns)
+- unclear service boundaries for future microservices
+- weaker dependency modeling for system design and research
+
+Solution:
+Move purchase data ownership to the payment module, and let the user module act as a consumer/aggregator:
+payment → owns purchases
+user → retrieves purchases to build library view
+
+- refactor endpoints to originate from payment module
+- expose user-facing endpoints (e.g. `/user/library`) via user module
+- call payment service internally (or via HTTP after microservice migration)
+
+What it does for the system:
+- enforces clear domain ownership
+- prevents user module from becoming overloaded
+- prepares clean microservice boundaries
+- introduces meaningful service dependency (user → payment)
+
+Sidenote (important for microservices):
+
+Current:
+user.service → require(payment.service)  (in-process)
+
+After migration:
+user-service → HTTP call → payment-service
+
+This transforms a code-level dependency into a runtime service dependency

@@ -102,6 +102,21 @@ const buildArtworkQuery = (combinedQueries, selectedCollection, queryText, filte
   return {};
 };
 
+exports.checkArtworkPurchase = async ({ artwork_id, user_id }) => {
+  if (!artwork_id || !user_id) {
+    throw new Error("Missing artwork_id or user_id");
+  }
+
+  const Purchase2Model = require("../../models/Purchase2");
+  const purchases = await Purchase2Model.find({ artwork_id, user_id });
+
+  if (purchases.length > 0) {
+    return { exists: true, data: purchases };
+  } else {
+    return { exists: false, data: [] };
+  }
+};
+
 exports.searchArtwork = async (body) => {
   const { combinedQueries, selectedCollection, query, filters } = body;
 

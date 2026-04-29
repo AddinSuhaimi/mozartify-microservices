@@ -4,5 +4,6 @@ const musicController = require("./music.controller");
 
 router.get("/refine-search", musicController.getMusicRefineSearch);
 router.post("/search-music", musicController.searchMusic);
+router.post("/check-purchase", musicController.checkPurchase);
 
 module.exports = router;

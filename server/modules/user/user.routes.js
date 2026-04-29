@@ -8,6 +8,8 @@ router.get("/art-preferences-options", userController.getArtPreferencesOptions);
 router.post("/preferences", isAuthenticated, userController.updateMusicPreferences);
 router.post("/art-preferences", isAuthenticated, userController.updateArtPreferences);
 router.get("/user-cart", isAuthenticated, userController.getUserCart);
+router.get("/user-library", isAuthenticated, userController.getUserLibrary);
+router.get("/user-artwork-library", isAuthenticated, userController.getUserArtworkLibrary);
 router.delete("/user/delete", isAuthenticated, userController.deleteUser);
 router.put("/user/update-username", isAuthenticated, userController.updateUsername);
 router.put("/user/change-password", isAuthenticated, userController.changePassword);

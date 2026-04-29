@@ -19,3 +19,14 @@ exports.searchMusic = async (req, res) => {
     res.status(500).json({ error: "Failed to search music" });
   }
 };
+
+exports.checkPurchase = async (req, res) => {
+  try {
+    const { score_id, user_id } = req.body;
+    const result = await musicService.checkPurchase({ score_id, user_id });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    console.error("Error checking purchase:", error);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};

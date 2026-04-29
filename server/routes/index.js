@@ -1290,6 +1290,7 @@ router.get("/filter-artworks", async (req, res) => {
   }
 });
 */
+/* REFACTORED INTO MUSIC MODULE
 router.post("/check-purchase", async (req, res) => {
   try {
     const { score_id, user_id } = req.body;
@@ -1315,6 +1316,7 @@ router.post("/check-purchase", async (req, res) => {
   }
 });
 
+/* REFACTORED INTO ARTS MODULE
 router.post("/check-artwork-purchase", async (req, res) => {
   try {
     const { artwork_id, user_id } = req.body;
@@ -1338,7 +1340,8 @@ router.post("/check-artwork-purchase", async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
+*/
+/* REFACTORED INTO USER MODULE (via payment service)
 router.get("/user-purchases", async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -1368,6 +1371,7 @@ router.get("/user-artwork-purchases", async (req, res) => {
     res.status(500).send("Error fetching purchases for the user.");
   }
 });
+*/
 //refactored
 router.get("/user-cart", async (req, res) => {
   try {

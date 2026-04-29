@@ -181,3 +181,27 @@ exports.updateProfilePicture = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+exports.getUserLibrary = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const library = await userService.getUserLibrary(userId);
+    res.status(200).json(library);
+  } catch (error) {
+    console.error("Error fetching user library:", error);
+    res.status(500).json({ error: "Failed to fetch user library" });
+  }
+};
+
+exports.getUserArtworkLibrary = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const library = await userService.getUserArtworkLibrary(userId);
+    res.status(200).json(library);
+  } catch (error) {
+    console.error("Error fetching user artwork library:", error);
+    res.status(500).json({ error: "Failed to fetch user artwork library" });
+  }
+};

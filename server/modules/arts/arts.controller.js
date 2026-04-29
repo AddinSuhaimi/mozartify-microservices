@@ -19,3 +19,14 @@ exports.searchArtwork = async (req, res) => {
     res.status(500).json({ error: "Failed to search artworks" });
   }
 };
+
+exports.checkArtworkPurchase = async (req, res) => {
+  try {
+    const { artwork_id, user_id } = req.body;
+    const result = await artsService.checkArtworkPurchase({ artwork_id, user_id });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    console.error("Error checking artwork purchase:", error);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};

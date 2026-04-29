@@ -157,6 +157,7 @@ const inboxRoutes  = require(path.join(__dirname, "routes/inbox"));
   app.use("/api", require("./modules/notification/notification.routes"));
   app.use("/api", require("./modules/auth/auth.routes"));
   app.use("/api", require("./modules/user/user.routes"));
+  app.use("/api", require("./modules/payment/payment.routes"));
   app.use("/api", require("./modules/music/music.routes"));
   app.use("/api", require("./modules/arts/arts.routes"));
   

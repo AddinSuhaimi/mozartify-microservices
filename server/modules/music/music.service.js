@@ -102,3 +102,18 @@ exports.searchMusic = async (body) => {
 
   return await ABCFileModel.find(mongoQuery);
 };
+
+exports.checkPurchase = async ({ score_id, user_id }) => {
+  if (!score_id || !user_id) {
+    throw new Error("Missing score_id or user_id");
+  }
+
+  const PurchaseModel = require("../../models/Purchase");
+  const purchases = await PurchaseModel.find({ score_id, user_id });
+
+  if (purchases.length > 0) {
+    return { exists: true, data: purchases };
+  } else {
+    return { exists: false, data: [] };
+  }
+};
