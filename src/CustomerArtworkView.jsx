@@ -543,7 +543,7 @@ export default function CustomerArtworkView() {
     if (ratingGiven > 0) {
       try {
    
-        await axios.post(`${API_BASE_URL}/submit-artwork-rating`, {
+        await axios.post(`${API_BASE_URL}/submit-rating-artwork`, {
           rating: ratingGiven,
           artworkId: artworkId,
           userId: user?._id,

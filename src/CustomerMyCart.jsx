@@ -284,7 +284,7 @@ export default function CustomerMyCart() {
 
   const handleRemoveItem = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/remove-item-from-cart/${id}`);
+      await axios.delete(`${API_BASE_URL}/remove-score-from-cart/${id}`);
       await fetchCartItemIDs();
     } catch (error) {
       console.error("Error removing item from cart:", error);

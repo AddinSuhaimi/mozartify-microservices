@@ -169,7 +169,7 @@ export default function CustomerFavorites() {
 
   const addToCart = async (scoreId) => {
     try {
-      await axios.post(`${API_BASE_URL}/add-to-cart`, {
+      await axios.post(`${API_BASE_URL}/add-to-cart-music`, {
         musicScoreId: scoreId,
       });
       setAddedToCartScores([...addedToCartScores, scoreId]);

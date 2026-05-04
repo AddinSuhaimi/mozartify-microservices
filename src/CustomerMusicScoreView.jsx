@@ -247,7 +247,7 @@ export default function CustomerMusicScoreView() {
     if (ratingGiven > 0) {
       try {
         // Send the rating to the backend
-        await axios.post(`${API_BASE_URL}/submit-rating`, {
+        await axios.post(`${API_BASE_URL}/submit-rating-music`, {
           rating: ratingGiven,
           scoreId: id, // Assuming you have `id` for the music score
           userId: user?._id, // Assuming you have `user._id` available
@@ -631,7 +631,7 @@ export default function CustomerMusicScoreView() {
 
   const addToCart = async (id) => {
     try {
-      await axios.post(`${API_BASE_URL}/add-to-cart`, {
+      await axios.post(`${API_BASE_URL}/add-to-cart-music`, {
         musicScoreId: id,
       });
       setAddedToCartScores([...addedToCartScores, id]);
