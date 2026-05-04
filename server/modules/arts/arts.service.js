@@ -1,5 +1,6 @@
 const ArtworkModel = require("../../models/Artwork");
 const Cart2Model = require("../../models/Cart2");
+const mongoose = require("mongoose");
 
 exports.getArtworkRefineSearch = async () => {
   const sample = await ArtworkModel.findOne().lean();
@@ -141,4 +142,59 @@ exports.getUserArtworkCart = async (userId) => {
   return cart.artwork_ids.map((artworkId) => ({
     artwork_id: artworkId,
   }));
+};
+
+exports.getArtworkById = async (artworkId) => {
+  let artwork;
+
+  if (mongoose.Types.ObjectId.isValid(artworkId)) {
+    artwork = await ArtworkModel.findById(artworkId);
+  } else {
+    artwork = await ArtworkModel.findOne({ filename: artworkId });
+  }
+
+  if (!artwork) {
+    throw new Error("Artwork not found");
+  }
+
+  return artwork;
+};
+
+exports.getArtworksByIds = async (artworkIds) => {
+  if (!artworkIds || artworkIds.length === 0) {
+    throw new Error("No artwork IDs provided");
+  }
+
+  const artworks = await ArtworkModel.find({
+    _id: { $in: artworkIds },
+  });
+
+  if (artworks.length === 0) {
+    throw new Error("No artworks found");
+  }
+
+  return artworks;
+};
+
+exports.getPopularArtworks = async () => {
+  const popularArtworks = await ArtworkModel.find()
+    .sort({ downloads: -1 })
+    .limit(10);
+
+  return popularArtworks;
+};
+
+exports.getUserLikedArtworks = async (userId) => {
+  const UserModel = require("../../models/User");
+  const user = await UserModel.findById(userId);
+
+  if (!user || !user.favorites_art || user.favorites_art.length === 0) {
+    throw new Error("No liked artworks found");
+  }
+
+  const likedArtworks = await ArtworkModel.find({
+    _id: { $in: user.favorites_art },
+  });
+
+  return likedArtworks;
 };

@@ -43,3 +43,70 @@ exports.getUserMusicCart = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch music cart" });
   }
 };
+
+exports.getMusicScoreById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const musicScore = await musicService.getMusicScoreById(id);
+    res.status(200).json(musicScore);
+  } catch (error) {
+    console.error("Error fetching music score:", error);
+    if (error.message === "Music score not found") {
+      return res.status(404).json({ message: "Music score not found" });
+    }
+    res.status(500).json({ error: "Error fetching music score." });
+  }
+};
+
+exports.getMusicScoresByIds = async (req, res) => {
+  try {
+    const { scoreIds } = req.query;
+
+    if (!scoreIds) {
+      return res.status(400).json({ message: "No score IDs provided" });
+    }
+
+    let scoreIdArray;
+
+    if (Array.isArray(scoreIds)) {
+      scoreIdArray = scoreIds;
+    } else if (typeof scoreIds === "string") {
+      scoreIdArray = scoreIds.split(",");
+    } else {
+      return res.status(400).json({ message: "Invalid score IDs format" });
+    }
+
+    const musicScores = await musicService.getMusicScoresByIds(scoreIdArray);
+    res.status(200).json(musicScores);
+  } catch (error) {
+    console.error("Error fetching music scores:", error);
+    if (error.message === "No music scores found") {
+      return res.status(404).json({ message: "No music scores found" });
+    }
+    res.status(500).json({ error: "Error fetching music scores." });
+  }
+};
+
+exports.getPopularMusicScores = async (req, res) => {
+  try {
+    const popularScores = await musicService.getPopularMusicScores();
+    res.status(200).json(popularScores);
+  } catch (error) {
+    console.error("Error fetching popular music scores:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.getUserLikedMusicScores = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const likedScores = await musicService.getUserLikedMusicScores(userId);
+    res.status(200).json(likedScores);
+  } catch (error) {
+    console.error("Error fetching liked music scores:", error);
+    if (error.message === "No liked scores found") {
+      return res.status(404).json({ message: "No liked scores found" });
+    }
+    res.status(500).json({ message: "Error fetching liked music scores." });
+  }
+};

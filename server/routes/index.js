@@ -1413,7 +1413,7 @@ router.get("/user-artwork-cart", async (req, res) => {
   }
 });
 */
-// Get artwork by ID
+/* MERGED INTO ARTWORK ENDPOINT
 router.get("/fetchArts/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -1437,7 +1437,8 @@ router.get("/fetchArts/:id", async (req, res) => {
       .json({ message: "Error fetching artwork", error: err.message });
   }
 });
-
+*/
+/* DUPLICATE OF EXISTING ENDPOINT
 router.get("/check-purchase/:artwork_id", async (req, res) => {
   try {
     const { artwork_id } = req.params;
@@ -1461,6 +1462,7 @@ router.get("/check-purchase/:artwork_id", async (req, res) => {
     });
   }
 });
+*/
 
 router.get("/download-artwork", async (req, res) => {
   try {
@@ -1613,6 +1615,7 @@ router.delete("/remove-artwork-from-cart/:id", async (req, res) => {
   }
 });
 
+/* REFACTORED INTO MUSIC AND ARTS MODULES
 router.get("/music-score/:id", async (req, res) => {
   try {
     const scoreId = req.params.id;
@@ -1778,7 +1781,7 @@ router.get("/user-liked-artworks", async (req, res) => {
     res.status(500).json({ message: "Error fetching liked artworks." });
   }
 });
-
+*/
 router.get("/user-composed-scores", async (req, res) => {
   try {
     const userId = req.session.userId;

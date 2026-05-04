@@ -130,3 +130,52 @@ exports.getUserMusicCart = async (userId) => {
     score_id: scoreId,
   }));
 };
+
+exports.getMusicScoreById = async (scoreId) => {
+  const musicScore = await ABCFileModel.findById(scoreId);
+
+  if (!musicScore) {
+    throw new Error("Music score not found");
+  }
+
+  return musicScore;
+};
+
+exports.getMusicScoresByIds = async (scoreIds) => {
+  if (!scoreIds || scoreIds.length === 0) {
+    throw new Error("No score IDs provided");
+  }
+
+  const musicScores = await ABCFileModel.find({
+    _id: { $in: scoreIds },
+  });
+
+  if (musicScores.length === 0) {
+    throw new Error("No music scores found");
+  }
+
+  return musicScores;
+};
+
+exports.getPopularMusicScores = async () => {
+  const popularScores = await ABCFileModel.find()
+    .sort({ downloads: -1 })
+    .limit(10);
+
+  return popularScores;
+};
+
+exports.getUserLikedMusicScores = async (userId) => {
+  const UserModel = require("../../models/User");
+  const user = await UserModel.findById(userId);
+
+  if (!user || !user.favorites_music || user.favorites_music.length === 0) {
+    throw new Error("No liked scores found");
+  }
+
+  const likedScores = await ABCFileModel.find({
+    _id: { $in: user.favorites_music },
+  });
+
+  return likedScores;
+};

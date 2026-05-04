@@ -344,7 +344,7 @@ export default function CustomerArtworkView() {
     const fetchArtwork = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/fetchArts/${artworkId}`
+          `${API_BASE_URL}/artwork/${artworkId}`
         );
         if (response.data) {
           const processedArtwork = {
