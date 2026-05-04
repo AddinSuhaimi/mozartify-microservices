@@ -29,3 +29,43 @@ exports.getUserArtworkPurchases = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch artwork purchases" });
   }
 };
+
+exports.submitMusicRating = async (req, res) => {
+  try {
+    const { rating, scoreId } = req.body;
+    const userId = req.session.userId;
+
+    await paymentService.submitMusicRating(userId, scoreId, rating);
+
+    res.status(200).json({
+      success: true,
+      message: "Rating submitted!",
+    });
+  } catch (error) {
+    console.error("Error submitting music rating:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+exports.submitArtworkRating = async (req, res) => {
+  try {
+    const { rating, artworkId } = req.body;
+    const userId = req.session.userId;
+
+    await paymentService.submitArtworkRating(userId, artworkId, rating);
+
+    res.status(200).json({
+      success: true,
+      message: "Rating submitted!",
+    });
+  } catch (error) {
+    console.error("Error submitting artwork rating:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

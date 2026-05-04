@@ -98,7 +98,7 @@ app.use(
 );
 
 console.log("✅ Session middleware configured");
-
+/*  debugging middleware for sessions and CORS - uncomment if needed
 // ================== DEBUG MIDDLEWARE  ==================
 app.use((req, res, next) => {
   console.log('\n🔍 === REQUEST DEBUG(from mainserver.js) ===');
@@ -110,7 +110,7 @@ app.use((req, res, next) => {
   console.log('========================\n');
   next();
 });
-
+*/
 // ================== BASIC MIDDLEWARE ==================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

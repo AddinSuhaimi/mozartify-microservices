@@ -179,3 +179,35 @@ exports.getUserLikedMusicScores = async (userId) => {
 
   return likedScores;
 };
+
+exports.addToCart = async (userId, musicScoreId) => {
+  let cart = await CartModel.findOne({ user_id: userId });
+
+  if (!cart) {
+    cart = new CartModel({
+      user_id: userId,
+      score_ids: [musicScoreId],
+    });
+  } else {
+    // safer comparison for ObjectId vs string
+    if (!cart.score_ids.some(id => id.toString() === musicScoreId)) {
+      cart.score_ids.push(musicScoreId);
+    }
+  }
+
+  await cart.save();
+};
+
+exports.removeFromCart = async (userId, scoreId) => {
+  const cart = await CartModel.findOneAndUpdate(
+    { user_id: userId },
+    { $pull: { score_ids: scoreId } },
+    { new: true }
+  );
+
+  if (!cart) {
+    throw new Error("Cart not found");
+  }
+
+  return cart;
+};

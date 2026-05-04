@@ -198,3 +198,34 @@ exports.getUserLikedArtworks = async (userId) => {
 
   return likedArtworks;
 };
+
+exports.addToCart = async (userId, artworkId) => {
+  let cart = await Cart2Model.findOne({ user_id: userId });
+
+  if (!cart) {
+    cart = new Cart2Model({
+      user_id: userId,
+      artwork_ids: [artworkId],
+    });
+  } else {
+    if (!cart.artwork_ids.some(id => id.toString() === artworkId)) {
+      cart.artwork_ids.push(artworkId);
+    }
+  }
+
+  await cart.save();
+};
+
+exports.removeFromCart = async (userId, artworkId) => {
+  const cart = await Cart2Model.findOneAndUpdate(
+    { user_id: userId },
+    { $pull: { artwork_ids: artworkId } },
+    { new: true }
+  );
+
+  if (!cart) {
+    throw new Error("Cart not found");
+  }
+
+  return cart;
+};

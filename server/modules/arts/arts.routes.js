@@ -11,5 +11,7 @@ router.get("/artwork/:id", artsController.getArtworkById);
 router.get("/artworks", artsController.getArtworksByIds);
 router.get("/popular-artworks", artsController.getPopularArtworks);
 router.get("/user-liked-artworks", isAuthenticated, artsController.getUserLikedArtworks);
+router.post("/add-to-cart-artwork", isAuthenticated, artsController.addToCart);
+router.delete("/remove-artwork-from-cart/:id", isAuthenticated, artsController.removeFromCart);
 
 module.exports = router;

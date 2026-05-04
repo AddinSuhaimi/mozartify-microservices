@@ -1463,7 +1463,7 @@ router.get("/check-purchase/:artwork_id", async (req, res) => {
   }
 });
 */
-
+// UNUSED ENDPOINTS FOR NOW - MAY BE REUSED IN THE FUTURE
 router.get("/download-artwork", async (req, res) => {
   try {
     const { imageUrl } = req.query;
@@ -1485,7 +1485,7 @@ router.get("/download-artwork", async (req, res) => {
     res.status(500).send("Download failed");
   }
 });
-
+/* REFACTORED INTO MUSIC AND ARTS MODULES
 router.post("/add-to-cart", async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -1533,7 +1533,8 @@ router.post("/add-to-cart-artwork", async (req, res) => {
     res.status(500).send("Error updating cart.");
   }
 });
-
+*/
+/* REFACTORED INTO PAYMENT MODULE
 router.post("/submit-rating", async (req, res) => {
   const { rating, scoreId, userId } = req.body;
 
@@ -1568,7 +1569,8 @@ router.post("/submit-artwork-rating", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
+*/
+/* REFACTORED INTO MUSIC AND ARTS MODULES
 router.delete("/remove-item-from-cart/:id", async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -1614,7 +1616,7 @@ router.delete("/remove-artwork-from-cart/:id", async (req, res) => {
     res.status(500).send("Error removing item from cart.");
   }
 });
-
+*/
 /* REFACTORED INTO MUSIC AND ARTS MODULES
 router.get("/music-score/:id", async (req, res) => {
   try {

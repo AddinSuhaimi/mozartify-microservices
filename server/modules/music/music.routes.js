@@ -11,5 +11,7 @@ router.get("/music-score/:id", musicController.getMusicScoreById);
 router.get("/music-scores", musicController.getMusicScoresByIds);
 router.get("/popular-music-scores", musicController.getPopularMusicScores);
 router.get("/user-liked-scores", isAuthenticated, musicController.getUserLikedMusicScores);
+router.post("/add-to-cart-music", isAuthenticated, musicController.addToCart);
+router.delete("/remove-score-from-cart/:id", isAuthenticated, musicController.removeFromCart);
 
 module.exports = router;

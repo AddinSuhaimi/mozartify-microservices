@@ -110,3 +110,36 @@ exports.getUserLikedArtworks = async (req, res) => {
     res.status(500).json({ message: "Error fetching liked artworks." });
   }
 };
+
+exports.addToCart = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { artworkId } = req.body;
+
+    await artsService.addToCart(userId, artworkId);
+
+    res.status(200).json({ message: "Artwork added to cart" });
+  } catch (error) {
+    console.error("Error updating artwork cart:", error.message);
+    res.status(500).json({ error: "Failed to update artwork cart" });
+  }
+};
+
+exports.removeFromCart = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const artworkId = req.params.id;
+
+    const updatedCart = await artsService.removeFromCart(userId, artworkId);
+
+    res.status(200).json(updatedCart);
+  } catch (error) {
+    console.error("Error removing artwork from cart:", error.message);
+
+    if (error.message === "Cart not found") {
+      return res.status(404).json({ message: "No cart found for the user." });
+    }
+
+    res.status(500).json({ error: "Failed to remove item from cart" });
+  }
+};
