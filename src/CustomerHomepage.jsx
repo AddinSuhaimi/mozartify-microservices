@@ -320,7 +320,7 @@ export default function CustomerHomepage() {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/recommendations`)
+      .get(`${API_BASE_URL}/recommendations-music`)
       .then((response) => {
         setRecommendations(response.data);
       })

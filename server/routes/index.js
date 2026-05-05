@@ -1916,7 +1916,7 @@ router.get("/customer-artwork-view/:id", async (req, res) => {
   }
 });
 */
-
+/* UNUSED ENDPOINTS - MAY BE UNNECESSARY
 router.get("/api/image-path", async (req, res) => {
   try {
     const score = await ABCFileModel.findOne();
@@ -1934,7 +1934,8 @@ router.get("/api/image-path-artwork", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
+*/
+/*
 const calculateRecommendations = async (userId) => {
   try {
     // Get user and their preferences
@@ -2150,7 +2151,7 @@ router.get("/artwork-recommendations", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
+*/
 const fulfillOrder = async (session) => {
   const userId = session.client_reference_id;
   const cartItems = session.display_items;

@@ -310,7 +310,7 @@ export default function CustomerHomepage2() {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/artwork-recommendations`)
+      .get(`${API_BASE_URL}/recommendations-artwork`)
       .then((response) => {
         // Randomizing the order of the recommendations
         const shuffledRecommendations = response.data.sort(

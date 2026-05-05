@@ -26,7 +26,8 @@ exports.signup = async ({ username, email, password, role }) => {
     password: hashedPassword,
     role,
     approval: role === "customer" ? "approved" : "pending",
-    first_timer: true,
+    music_first_timer: true,
+    art_first_timer: true,
   });
 
   await newUser.save();
@@ -117,6 +118,8 @@ exports.login = async ({ username_or_email, password }, session) => {
     userId: user._id,
     role: user.role,
     approval: user.approval,
+    music_first_timer: user.music_first_timer,
+    art_first_timer: user.art_first_timer,
     sessionId: session.id,
   };
 };

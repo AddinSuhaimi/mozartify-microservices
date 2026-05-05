@@ -44,7 +44,7 @@ exports.updateMusicPreferences = async (userId, preferences) => {
             composer_preferences,
             genre_preferences,
             emotion_preferences,
-            first_timer: false,
+            music_first_timer: false,
         },
         { new: true }
     );
