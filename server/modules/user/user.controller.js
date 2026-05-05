@@ -205,3 +205,20 @@ exports.getUserArtworkLibrary = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user artwork library" });
   }
 };
+
+exports.getUserComposedScores = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const composedScores = await userService.getUserComposedScores(userId);
+    res.status(200).json(composedScores);
+  } catch (error) {
+    console.error("Error fetching composed scores:", error);
+
+    if (error.message === "No composed scores found") {
+      return res.status(404).json({ message: "No composed scores found" });
+    }
+
+    res.status(500).json({ error: "Failed to fetch composed scores" });
+  }
+};

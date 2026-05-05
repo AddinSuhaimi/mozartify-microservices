@@ -143,3 +143,30 @@ exports.removeFromCart = async (req, res) => {
     res.status(500).json({ error: "Failed to remove item from cart" });
   }
 };
+
+exports.setFavoritesArtwork = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { artworkId, action } = req.body;
+
+    const result = await artsService.setFavoritesArtwork(userId, artworkId, action);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error setting artwork favorite:", error.message);
+
+    if (error.message === "Invalid artworkId format") {
+      return res.status(400).json({ message: "Invalid artworkId format" });
+    }
+
+    if (error.message === "User not found") {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (error.message === "Invalid action specified") {
+      return res.status(400).json({ message: "Invalid action specified" });
+    }
+
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

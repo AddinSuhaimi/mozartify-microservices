@@ -291,7 +291,7 @@ export default function CustomerCompose() {
       });
 
       // Send the request to the server
-      const response = await axios.post(`${API_BASE_URL}/set-favorites`, {
+      const response = await axios.post(`${API_BASE_URL}/set-favorites-music`, {
         musicScoreId,
         action: isFavorite ? "remove" : "add", // Explicitly specify the action
       });

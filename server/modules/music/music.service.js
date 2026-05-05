@@ -211,3 +211,36 @@ exports.removeFromCart = async (userId, scoreId) => {
 
   return cart;
 };
+
+exports.setFavoritesMusic = async (userId, musicScoreId, action) => {
+  const UserModel = require("../../models/User");
+  const mongoose = require("mongoose");
+
+  if (!mongoose.Types.ObjectId.isValid(musicScoreId)) {
+    throw new Error("Invalid musicScoreId format");
+  }
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (action === "add") {
+    if (!user.favorites_music.includes(musicScoreId)) {
+      user.favorites_music.push(musicScoreId);
+    }
+  } else if (action === "remove") {
+    user.favorites_music = user.favorites_music.filter(
+      (favId) => favId.toString() !== musicScoreId
+    );
+  } else {
+    throw new Error("Invalid action specified");
+  }
+
+  await user.save();
+
+  return {
+    message: "Favorite updated successfully",
+    favorites_music: user.favorites_music,
+  };
+};

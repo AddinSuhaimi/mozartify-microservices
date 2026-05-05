@@ -300,7 +300,7 @@ export default function CustomerSearch2() {
     try {
       const isFavorite = user?.favorites_art?.includes(artworkId);
 
-      const response = await axios.post(`${API_BASE_URL}/set-favorites`, {
+      const response = await axios.post(`${API_BASE_URL}/set-favorites-music`, {
         artworkId,
         action: isFavorite ? "remove" : "add", // Explicitly specify the action
       });

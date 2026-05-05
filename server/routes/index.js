@@ -1784,6 +1784,7 @@ router.get("/user-liked-artworks", async (req, res) => {
   }
 });
 */
+/* REFACTORED INTO USER MODULE
 router.get("/user-composed-scores", async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -1808,7 +1809,9 @@ router.get("/user-composed-scores", async (req, res) => {
     res.status(500).json({ message: "Error fetching liked music scores." });
   }
 });
+*/
 
+/* REFACTORED INTO MUSIC MODULE
 router.post("/set-favorites", async (req, res) => {
   const userId = req.session.userId;
   const { musicScoreId, action } = req.body;
@@ -1845,7 +1848,9 @@ router.post("/set-favorites", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
+*/
 
+/* REFACTORED INTO ARTS MODULE
 router.post("/set-favorites-artwork", async (req, res) => {
   const userId = req.session.userId;
   const { artworkId, action } = req.body;
@@ -1882,7 +1887,9 @@ router.post("/set-favorites-artwork", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
+*/
 
+/* REFACTORED INTO MUSIC MODULE
 router.get("/customer-music-score-view/:id", async (req, res) => {
   try {
     const musicScore = await ABCFileModel.findById(req.params.id);
@@ -1894,10 +1901,12 @@ router.get("/customer-music-score-view/:id", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
+*/
 
+/* REFACTORED INTO ARTS MODULE
 router.get("/customer-artwork-view/:id", async (req, res) => {
   try {
-    const artwork = await ArtworkModel.findById(req.params.id);
+    const artwork = await ArtworkModel.findById(req.params.id);f
     if (!artwork) {
       return res.status(404).json({ message: "Artwork not found" });
     }
@@ -1906,6 +1915,7 @@ router.get("/customer-artwork-view/:id", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
+*/
 
 router.get("/api/image-path", async (req, res) => {
   try {

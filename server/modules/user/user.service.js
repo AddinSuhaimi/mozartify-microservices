@@ -138,6 +138,24 @@ exports.getUserArtworkLibrary = async (userId) => {
   return { purchases: [], artworks: [] };
 };
 
+exports.getUserComposedScores = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const user = await UserModel.findById(userId);
+
+  if (!user || !user.composed_score_ids || user.composed_score_ids.length === 0) {
+    throw new Error("No composed scores found");
+  }
+
+  const composedScores = await ABCFileModel.find({
+    _id: { $in: user.composed_score_ids },
+  });
+
+  return composedScores;
+};
+
 exports.deleteUser = async (userId) => {
   // 1. Validate userId
   if (!mongoose.Types.ObjectId.isValid(userId)) {

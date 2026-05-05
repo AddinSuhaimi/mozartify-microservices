@@ -10,6 +10,7 @@ router.post("/art-preferences", isAuthenticated, userController.updateArtPrefere
 router.get("/user-cart", isAuthenticated, userController.getUserCart);
 router.get("/user-library", isAuthenticated, userController.getUserLibrary);
 router.get("/user-artwork-library", isAuthenticated, userController.getUserArtworkLibrary);
+router.get("/user-composed-scores", isAuthenticated, userController.getUserComposedScores);
 router.delete("/user/delete", isAuthenticated, userController.deleteUser);
 router.put("/user/update-username", isAuthenticated, userController.updateUsername);
 router.put("/user/change-password", isAuthenticated, userController.changePassword);

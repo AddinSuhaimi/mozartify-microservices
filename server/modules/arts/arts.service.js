@@ -229,3 +229,36 @@ exports.removeFromCart = async (userId, artworkId) => {
 
   return cart;
 };
+
+exports.setFavoritesArtwork = async (userId, artworkId, action) => {
+  const UserModel = require("../../models/User");
+  const mongooseModule = require("mongoose");
+
+  if (!mongooseModule.Types.ObjectId.isValid(artworkId)) {
+    throw new Error("Invalid artworkId format");
+  }
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (action === "add") {
+    if (!user.favorites_art.includes(artworkId)) {
+      user.favorites_art.push(artworkId);
+    }
+  } else if (action === "remove") {
+    user.favorites_art = user.favorites_art.filter(
+      (favId) => favId.toString() !== artworkId
+    );
+  } else {
+    throw new Error("Invalid action specified");
+  }
+
+  await user.save();
+
+  return {
+    message: "Favorite updated successfully",
+    favorites_art: user.favorites_art,
+  };
+};
