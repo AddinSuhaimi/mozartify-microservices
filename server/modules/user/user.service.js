@@ -2,7 +2,6 @@ const ABCFileModel = require("../../models/ABCFile");
 const ArtworkModel = require("../../models/Artwork");
 const mongoose = require("mongoose");
 const UserModel = require("../../models/User");
-const CartModel = require("../../models/Cart");
 const DeletedUserModel = require("../../models/DeletedUser");
 const bcrypt = require("bcryptjs");
 
@@ -78,20 +77,6 @@ exports.updateArtPreferences = async (userId, preferences) => {
     }
 
     return updatedUser;
-};
-
-exports.getUserCart = async (userId) => {
-  const cart = await CartModel.findOne({ user_id: userId });
-
-  if (!cart || !cart.score_ids || cart.score_ids.length === 0) {
-    return [];
-  }
-
-  const cartItems = cart.score_ids.map((scoreId) => ({
-    score_id: scoreId,
-  }));
-
-  return cartItems;
 };
 
 exports.getUserLibrary = async (userId) => {

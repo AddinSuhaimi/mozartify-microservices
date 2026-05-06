@@ -2152,6 +2152,7 @@ router.get("/artwork-recommendations", async (req, res) => {
   }
 });
 */
+/* REFACTORED INTO PAYMENT MODULE
 const fulfillOrder = async (session) => {
   const userId = session.client_reference_id;
   const cartItems = session.display_items;
@@ -2271,7 +2272,8 @@ router.post("/create-checkout-session-artwork", async (req, res) => {
 
   res.json({ id: paymentSession.id });
 });
-
+*/
+/* REFACTORED INTO PAYMENT MODULE
 router.post("/complete-purchase", async (req, res) => {
   const userId = req.session.userId;
 
@@ -2385,6 +2387,6 @@ router.post("/complete-purchase-artwork", async (req, res) => {
     res.status(500).json({ message: "Failed to complete purchase" });
   }
 });
-
+*/
 module.exports = router;
  

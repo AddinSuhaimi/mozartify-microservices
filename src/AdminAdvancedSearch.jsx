@@ -388,7 +388,7 @@ export default function AdminAdvancedSearch() {
   useEffect(() => {
     const fetchAddedToCartScores = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/user-cart`);
+        const response = await axios.get(`${API_BASE_URL}/user-music-cart`);
 
         if (response.data.length === 0) {
           setAddedToCartScores([]);

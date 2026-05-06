@@ -241,3 +241,56 @@ After migration:
 user-service → HTTP call → payment-service
 
 This transforms a code-level dependency into a runtime service dependency
+
+7) Redundant payment fulfillment orchestration (frontend completion vs webhook fulfillment)
+
+Problem:
+Payment completion logic was partially implemented in two separate architectural flows:
+/complete-purchase-music
+/complete-purchase-artwork
+
+and:
+Stripe webhook → checkout.session.completed
+
+The frontend-triggered `complete-purchase` endpoints were performing the actual fulfillment responsibilities:
+- purchase insertion
+- duplicate cleanup
+- cart clearing
+- transaction completion
+
+Meanwhile, webhook fulfillment methods (`fulfillMusicOrder`, `fulfillArtworkOrder`) attempted to perform the same orchestration but relied on incomplete Stripe session item data (`session.display_items`).
+
+This caused:
+- partially duplicated orchestration design
+- unclear authoritative fulfillment flow
+- inconsistent payment architecture
+- race conditions during simultaneous testing
+- `VersionError` caused by concurrent cart modifications
+- confusion between event-driven and frontend-triggered fulfillment responsibilities
+
+Solution:
+Retain the `complete-purchase` endpoints as the authoritative fulfillment mechanism during the modular monolith phase, while simplifying the Stripe webhook into a verification/event-listening role.
+
+Current architecture:
+Stripe Checkout → Frontend success page → /complete-purchase endpoint → payment.service.js
+
+Refactoring actions:
+- centralize purchase fulfillment logic inside `payment.service.js`
+- retain frontend-triggered completion flow for stability
+- remove incomplete webhook fulfillment methods (`fulfillMusicOrder`, `fulfillArtworkOrder`)
+- consolidate duplicated cart-clearing logic into reusable helper methods
+- replace document-based cart updates (`save()`) with atomic `updateOne()` operations
+- simplify webhook responsibility to Stripe event verification and logging
+
+Sidenote (important for microservices):
+
+Current:
+payment module → direct model access (CartModel, PurchaseModel)
+
+After migration:
+payment-service → HTTP call → music-service/arts-service
+
+Future enhancement:
+Stripe webhook → payment-service event orchestration
+
+can later evolve into a fully event-driven fulfillment architecture after microservice migration.

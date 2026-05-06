@@ -237,7 +237,7 @@ export default function CustomerMyCart() {
 
   const fetchCartItemIDs = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/user-cart`);
+      const response = await axios.get(`${API_BASE_URL}/user-music-cart`);
       if (response.data.length === 0) {
         setCartItemIDs([]);
         return;
@@ -371,7 +371,7 @@ export default function CustomerMyCart() {
     }
 
     const response = await axios.post(
-      `${API_BASE_URL}/create-checkout-session`,
+      `${API_BASE_URL}/create-checkout-session-music`,
       {
         cartItems,
       }

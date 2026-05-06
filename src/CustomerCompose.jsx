@@ -164,7 +164,7 @@ export default function CustomerCompose() {
   useEffect(() => {
     const fetchAddedToCartScores = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/user-cart`);
+        const response = await axios.get(`${API_BASE_URL}/user-music-cart`);
 
         const AddedScoreIds = response.data.map((added) => added.score_id);
 

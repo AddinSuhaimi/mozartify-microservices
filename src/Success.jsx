@@ -9,7 +9,7 @@ const Success = () => {
   useEffect(() => {
     const completePurchase = async () => {
       try {
-        const response = await axios.post(`${API_BASE_URL}/complete-purchase`);
+        const response = await axios.post(`${API_BASE_URL}/complete-purchase-music`);
         console.log('Purchase completion response:', response.data);
       } catch (error) {
         console.error('Error completing purchase:', error);
