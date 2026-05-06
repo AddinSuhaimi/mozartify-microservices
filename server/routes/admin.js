@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 const express = require("express"); 
 
 const router = express.Router();
-
+/* REFACTORED TO USER MODULE
 // Fetch all users
 router.get("/users", async (req, res) => {
   try {
@@ -120,7 +120,8 @@ router.put("/users/:id", async (req, res) => {
     }
   }
 });
-
+*/
+/* REFACTORED TO INBOX MODULE
 router.post("/api/feedback/reply/:id", async (req, res) => {
   const { id } = req.params;
   const { replyMessage } = req.body;
@@ -149,7 +150,8 @@ router.post("/api/feedback/reply/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to add reply" });
   }
 });
-
+*/
+/* REFACTORED TO USER MODULE
 // Add user to deletedusers
 router.post("/deletedusers", async (req, res) => {
   try {
@@ -244,8 +246,8 @@ router.delete("/users/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
-
-// Backend endpoint
+*/
+/* REFACTORED TO ANALYTICS MODULE
 router.get("/admin/stats", async (req, res) => {
   try {
     const totalUsers = await User.countDocuments({ role: "customer" });
@@ -323,7 +325,7 @@ router.get("/admin/stats", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch stats" });
   }
 });
-
+*/
 router.get("/admin/feedbacks", async (req, res) => {
   try {
     // Fetch all feedbacks with status "pending"

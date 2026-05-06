@@ -207,3 +207,135 @@ exports.getUserComposedScores = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch composed scores" });
   }
 };
+
+// ========== ADMIN USER MANAGEMENT ==========
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await userService.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await userService.getUserById(req.params.id);
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+
+    if (error.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
+};
+
+exports.createUser = async (req, res) => {
+  try {
+    const user = await userService.createUser(req.body);
+    res.status(201).json(user);
+  } catch (error) {
+    console.error("Error creating user:", error.message);
+
+    if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern).join(", ");
+      return res.status(400).json({
+        error: `Duplicate entry for ${duplicateField}. A user with this ${duplicateField} already exists.`,
+      });
+    }
+
+    if (error.message.includes("already exists")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (error.message === "All fields are required") {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Failed to create user" });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
+    const user = await userService.updateUser(req.params.id, req.body);
+    res.json(user);
+  } catch (error) {
+    console.error("Error updating user:", error);
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        error: "Duplicate entry. A user with this email or username already exists.",
+      });
+    }
+
+    if (error.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (error.message.includes("required")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Failed to update user" });
+  }
+};
+
+exports.updateApprovalStatus = async (req, res) => {
+  try {
+    const { approval } = req.body;
+    const user = await userService.updateApprovalStatus(req.params.id, approval);
+    res.json(user);
+  } catch (error) {
+    console.error("Error updating approval status:", error);
+
+    if (error.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (error.message === "Invalid approval status") {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Failed to update approval status" });
+  }
+};
+
+exports.deleteUserAdmin = async (req, res) => {
+  try {
+    const result = await userService.deleteUserAdmin(req.params.id);
+    res.json(result);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+
+    if (error.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+};
+
+exports.addToDeletedUsers = async (req, res) => {
+  try {
+    const deletedUser = await userService.addToDeletedUsers(req.body);
+    res.status(201).json(deletedUser);
+  } catch (error) {
+    console.error("Error adding to deletedusers:", error);
+
+    if (error.message.includes("required")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    if (error.message.includes("already exists")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Failed to add user to deletedusers" });
+  }
+};

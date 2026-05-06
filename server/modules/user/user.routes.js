@@ -15,4 +15,13 @@ router.put("/user/update-username", isAuthenticated, userController.updateUserna
 router.put("/user/change-password", isAuthenticated, userController.changePassword);
 router.put("/user/update-profile-picture", isAuthenticated, userController.updateProfilePicture);
 
+// ========== ADMIN USER MANAGEMENT ROUTES ==========
+router.get("/users", userController.getAllUsers);                       // Get all users
+router.get("/users/:id", userController.getUserById);                   // Get user by ID
+router.post("/users", userController.createUser);                       // Create new user
+router.put("/users/:id", userController.updateUser);                    // Update user details
+router.put("/users/:id/approval", userController.updateApprovalStatus); // Update user approval status
+router.delete("/users/:id", userController.deleteUserAdmin);            // Delete user (admin)
+router.post("/deletedusers", userController.addToDeletedUsers);         // Add user to deletedusers 
+
 module.exports = router;
