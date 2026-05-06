@@ -121,7 +121,7 @@ const sendAdminApprovalEmail = (adminEmail, username, email) => {
   );
 };
 */
-
+/* OBSOLETE DEBUGGING MIDDLEWARE
 router.use((req, res, next) => {
   // Only log for specific routes that are failing
   if (
@@ -136,7 +136,7 @@ router.use((req, res, next) => {
   }
   next();
 });
-
+*/
 /* REFACTORED AS AUTH MIDDLEWARE
 const isAuthenticated = (req, res, next) => {
   console.log("🔍 AUTH CHECK DETAILED:");

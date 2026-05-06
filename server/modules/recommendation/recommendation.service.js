@@ -49,8 +49,21 @@ exports.getMusicRecommendations = async (userId) => {
     return { score, data: music };
   });
 
-console.log("Top music scores:", scored .filter(s => s.score > 0) .slice(0, 5) .map(s => ({ composer: s.data.composer, genre: s.data.genre, emotion: s.data.emotion , score: s.score })) );
 
+  console.log(
+    "Top music scores:",
+    scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map(s => ({
+        composer: s.data.composer,
+        genre: s.data.genre,
+        emotion: s.data.emotion,
+        score: s.score
+      }))
+  );
+  
   const recommendations = await finalizeRecommendations(
     scored,
     user.favorites_music,
