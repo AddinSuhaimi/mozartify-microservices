@@ -130,7 +130,7 @@ export default function CustomerAddNewFeedback() {
     }
 
     try {
-      await axios.post(`${API_BASE_URL}/api/feedback`, data);
+      await axios.post(`${API_BASE_URL}/music-feedback`, data);
       navigate("/customer-inbox");
     } catch (error) {
       console.error("There was an error submitting the feedback!", error);

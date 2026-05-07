@@ -162,12 +162,13 @@ const inboxRoutes  = require(path.join(__dirname, "routes/inbox"));
   app.use("/api", require("./modules/arts/arts.routes"));
   app.use("/api", require("./modules/recommendation/recommendation.routes"));
   app.use("/api", require("./modules/analytics/analytics.routes"));
+  app.use("/api", require("./modules/inbox/inbox.routes"));
 
   //app.use("/api", indexRoutes);
   app.use("/api", serverRoutes);
 
-  app.use("/api", inboxRoutes);
-  app.use("/api", adminRoutes);
+  // app.use("/api", inboxRoutes);
+  // app.use("/api", adminRoutes);
 
   console.log("✅ All route modules mounted successfully");
 } catch (error) {

@@ -50,7 +50,7 @@ const CustomerSidebar2 = ({ active }) => {
 
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/api/feedback?userId=${user._id}`
+          `${API_BASE_URL}/music-feedback?userId=${user._id}`
         );
 
         const unreadMessages = response.data.filter(

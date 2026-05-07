@@ -1,3 +1,4 @@
+console.log("✅ Analytics routes loaded");
 const express = require("express");
 const router = express.Router();
 

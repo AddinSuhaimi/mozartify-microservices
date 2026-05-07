@@ -1,3 +1,4 @@
+console.log("✅ Notification routes loaded");
 const router = require("express").Router();
 const controller = require("./notification.controller");
 

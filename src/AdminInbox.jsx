@@ -412,7 +412,7 @@ const AdminInbox = () => {
   const fetchFeedbackData = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/feedback`);
+      const response = await axios.get(`${API_BASE_URL}/music-feedback`);
       // Artificial delay of 1 second for smooth loading animation
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setFeedbackData(response.data);
@@ -434,7 +434,7 @@ const AdminInbox = () => {
   // Update the existing handlers to show notifications
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/feedback/delete/${id}`);
+      await axios.delete(`${API_BASE_URL}/music-feedback/delete/${id}`);
       setFeedbackData((prev) => prev.filter((feedback) => feedback._id !== id));
       showNotification("Feedback deleted successfully");
     } catch (error) {
@@ -490,7 +490,7 @@ const AdminInbox = () => {
     try {
       // Mark the feedback as read in the database
       await axios.put(
-        `${API_BASE_URL}/api/feedback/${feedback._id}/mark-read-admin`
+        `${API_BASE_URL}/music-feedback/${feedback._id}/mark-read-admin`
       );
       setUnreadCount(unreadCount - 1);
 
@@ -531,7 +531,7 @@ const AdminInbox = () => {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/feedback/reply/${selectedFeedback._id}`,
+        `${API_BASE_URL}/music-feedback/reply/${selectedFeedback._id}`,
         {
           message: newReply,
           sender: "admin",
@@ -566,7 +566,7 @@ const AdminInbox = () => {
   const handleMarkAsResolved = async (id) => {
     try {
       const response = await axios.patch(
-        `${API_BASE_URL}/api/feedback/status/${id}`,
+        `${API_BASE_URL}/music-feedback/status/${id}`,
         {
           status: "resolved",
         }

@@ -121,8 +121,8 @@ router.put("/users/:id", async (req, res) => {
   }
 });
 */
-/* REFACTORED TO INBOX MODULE
-router.post("/api/feedback/reply/:id", async (req, res) => {
+/* UNUSED ENDPOINT
+router.post("/music-feedback/reply/:id", async (req, res) => {
   const { id } = req.params;
   const { replyMessage } = req.body;
 
@@ -326,6 +326,7 @@ router.get("/admin/stats", async (req, res) => {
   }
 });
 */
+/* REFACTORED TO INBOX MODULE
 router.get("/admin/feedbacks", async (req, res) => {
   try {
     // Fetch all feedbacks with status "pending"
@@ -342,5 +343,5 @@ router.get("/admin/feedbacks", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch feedbacks" });
   }
 });
-
+*/
 module.exports = router;

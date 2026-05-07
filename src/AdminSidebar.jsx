@@ -39,28 +39,6 @@ const AdminSidebar = ({ active }) => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    const fetchFeedbackData = async () => {
-      if (!user?._id) return;
-
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/feedback/all`
-        );
-
-        const unreadMessages = response.data.filter(
-          (feedback) => !feedback.isReadAdmin
-        ).length;
-
-        setUnreadCount(unreadMessages); // Update context state
-      } catch (error) {
-        console.error("Error fetching feedback count data:", error);
-      }
-    };
-
-    fetchFeedbackData();
-  }, [user?._id, active]);
-
   const getUnreadFeedbackCount = () => unreadCount;
 
   const handleNavigation = async (path, key) => {

@@ -12,8 +12,8 @@ router.get("/inbox-test", (req, res) => {
   console.log("🚀 INBOX TEST ROUTE HIT!");
   res.json({ message: "Inbox routes are working!", timestamp: new Date() });
 });
-
-router.post("/api/feedback", upload.none(), async (req, res) => {
+/* REFACTORED TO INBOX MODULE
+router.post("/music-feedback", upload.none(), async (req, res) => {
   const { username, title, detail, user_id, attachment_url } = req.body;
 
   const feedback = new Feedback({
@@ -33,7 +33,7 @@ router.post("/api/feedback", upload.none(), async (req, res) => {
   }
 });
 
-router.post("/api/artwork-feedback", upload.none(), async (req, res) => {
+router.post("/artwork-feedback", upload.none(), async (req, res) => {
   const { username, title, detail, user_id, attachment_url } = req.body;
 
   const feedback2 = new Feedback2({
@@ -54,7 +54,7 @@ router.post("/api/artwork-feedback", upload.none(), async (req, res) => {
 });
 
 // Get userID-based feedbacks endpoint for customer
-router.get("/api/feedback", async (req, res) => {
+router.get("/music-feedback", async (req, res) => {
   const { userId } = req.query;
 
   try {
@@ -70,7 +70,7 @@ router.get("/api/feedback", async (req, res) => {
   }
 });
 
-router.get("/api/artwork-feedback", async (req, res) => {
+router.get("/artwork-feedback", async (req, res) => {
   const { userId } = req.query;
 
   try {
@@ -85,9 +85,9 @@ router.get("/api/artwork-feedback", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-
-// Get all feedbacks endpoint for admin
-router.get("/api/feedback/all", async (req, res) => {
+*/
+/* REDUNDANT ENDPOINT
+router.get("/music-feedback/all", async (req, res) => {
   try {
     const feedbacks = await Feedback.find(); // Fetch all feedbacks
     res.json(feedbacks);
@@ -95,9 +95,10 @@ router.get("/api/feedback/all", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err });
   }
 });
-
+*/
+/* REFACTORED TO INBOX MODULE
 // Delete feedback endpoint
-router.delete("/api/feedback/delete/:id", async (req, res) => {
+router.delete("/music-feedback/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await Feedback.findByIdAndDelete(id);
@@ -107,7 +108,7 @@ router.delete("/api/feedback/delete/:id", async (req, res) => {
   }
 });
 
-router.delete("/api/artwork-feedback/delete/:id", async (req, res) => {
+router.delete("/artwork-feedback/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await Feedback2.findByIdAndDelete(id);
@@ -118,7 +119,7 @@ router.delete("/api/artwork-feedback/delete/:id", async (req, res) => {
 });
 
 // Update reply endpoint
-router.post("/api/feedback/reply/:id", async (req, res) => {
+router.post("/music-feedback/reply/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { message, sender } = req.body;
@@ -160,7 +161,7 @@ router.post("/api/feedback/reply/:id", async (req, res) => {
   }
 });
 
-router.post("/api/artwork-feedback/reply/:id", async (req, res) => {
+router.post("/artwork-feedback/reply/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { message, sender } = req.body;
@@ -205,9 +206,10 @@ router.post("/api/artwork-feedback/reply/:id", async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
-
+*/
+/* REFACTORED TO INBOX MODULE
 // New endpoint to update feedback status (admin only)
-router.patch("/api/feedback/status/:id", async (req, res) => {
+router.patch("/music-feedback/status/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -233,7 +235,7 @@ router.patch("/api/feedback/status/:id", async (req, res) => {
   }
 });
 
-router.patch("/api/artwork-feedback/status/:id", async (req, res) => {
+router.patch("/artwork-feedback/status/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -259,7 +261,7 @@ router.patch("/api/artwork-feedback/status/:id", async (req, res) => {
   }
 });
 
-router.put("/api/feedback/:id/mark-read-customer", async (req, res) => {
+router.put("/music-feedback/:id/mark-read-customer", async (req, res) => {
   try {
     await Feedback.findByIdAndUpdate(req.params.id, { isReadCustomer: true });
     res.json({ message: "Feedback marked as read by customer" });
@@ -268,7 +270,7 @@ router.put("/api/feedback/:id/mark-read-customer", async (req, res) => {
   }
 });
 
-router.put("/api/artwork-feedback/:id/mark-read-customer", async (req, res) => {
+router.put("/artwork-feedback/:id/mark-read-customer", async (req, res) => {
   try {
     await Feedback2.findByIdAndUpdate(req.params.id, { isReadCustomer: true });
     res.json({ message: "Feedback marked as read by customer" });
@@ -277,7 +279,7 @@ router.put("/api/artwork-feedback/:id/mark-read-customer", async (req, res) => {
   }
 });
 
-router.put("/api/feedback/:id/mark-read-admin", async (req, res) => {
+router.put("/music-feedback/:id/mark-read-admin", async (req, res) => {
   try {
     await Feedback.findByIdAndUpdate(req.params.id, { isReadAdmin: true });
     res.json({ message: "Feedback marked as read by admin" });
@@ -286,7 +288,7 @@ router.put("/api/feedback/:id/mark-read-admin", async (req, res) => {
   }
 });
 
-router.put("/api/artwork-feedback/:id/mark-read-admin", async (req, res) => {
+router.put("/artwork-feedback/:id/mark-read-admin", async (req, res) => {
   try {
     await Feedback2.findByIdAndUpdate(req.params.id, { isReadAdmin: true });
     res.json({ message: "Feedback marked as read by admin" });
@@ -294,7 +296,7 @@ router.put("/api/artwork-feedback/:id/mark-read-admin", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
-
+*/
 console.log("🔍 INBOX ROUTER DEBUG INFO:");
 console.log("Router exists:", !!router);
 console.log("Router stack length:", router.stack ? router.stack.length : 'undefined');
