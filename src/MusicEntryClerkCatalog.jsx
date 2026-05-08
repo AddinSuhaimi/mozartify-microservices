@@ -421,10 +421,10 @@ export default function MusicEntryClerkCatalog() {
       }));
 
       // Upload file to Firebase Storage
-      const storageRef = ref(storage, `mp3_file/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const fileUrl = await getDownloadURL(storageRef);
-
+      // const storageRef = ref(storage, `mp3_file/${file.name}`);
+      // await uploadBytes(storageRef, file);
+      //const fileUrl = await getDownloadURL(storageRef);
+      const fileUrl = "http://localhost:10000/public/test-audio/test1.mp3";
       // Update catalogData with Firebase URL and filename
       setCatalogData((prevData) => ({
         ...prevData,
@@ -434,7 +434,7 @@ export default function MusicEntryClerkCatalog() {
 
       // Call emotion prediction API
       const emotionResponse = await axios.post(
-        "http://127.0.0.1:5173/predict-emotion",
+        `${API_BASE_URL}/predictEmotion`,
         { fileUrl }
       );
 
@@ -446,8 +446,8 @@ export default function MusicEntryClerkCatalog() {
 
       // Call gender prediction API
       const genderResponse = await axios.post(
-        "http://127.0.0.1:9000/predict-gender",
-        { file_url: fileUrl }
+        `${API_BASE_URL}/predictGender`,
+        { fileUrl }
       );
 
       // Update catalogData with the predicted gender
@@ -458,7 +458,7 @@ export default function MusicEntryClerkCatalog() {
 
       // Call genre prediction API
       const genreResponse = await axios.post(
-        "http://127.0.0.1:8001/predict-genre",
+        `${API_BASE_URL}/predictGenre`,
         { fileUrl }
       );
 
@@ -516,7 +516,7 @@ export default function MusicEntryClerkCatalog() {
 
       // Call instrument prediction API
       const instrumentResponse = await axios.post(
-        "http://127.0.0.1:8000/predict-instrument",
+        `${API_BASE_URL}/predictInstrument`,
         {
           fileUrl: catalogData.mp3FileUrl,
         }

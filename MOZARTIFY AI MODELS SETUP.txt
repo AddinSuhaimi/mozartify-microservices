@@ -1,0 +1,133 @@
+MOZARTIFY AI MODELS SETUP
+
+# 🎯 Recommended final ports
+
+```text id="p4n7ks"
+8001 → genre.py
+8002 → emotion.py
+8003 → gender.py
+```
+
+---
+
+# ✅ Step 1 — Update ai.constants.js
+
+```javascript id="r7x1mw"
+const fastApiEndpoints = {
+  emotion: `${FASTAPI_BASE_URL}:8002/predict-emotion`,
+  gender: `${FASTAPI_BASE_URL}:8003/predict-gender`,
+  genre: `${FASTAPI_BASE_URL}:8001/predict-genre`,
+};
+```
+
+---
+
+# ✅ Step 2 — Add uvicorn startup to EACH FastAPI file
+
+---
+
+# emotion.py
+
+```python id="v3k9pu"
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8002)
+```
+
+---
+
+# genre.py
+
+```python id="y6q2ra"
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8001)
+```
+
+---
+
+# gender.py
+
+```python id="t8m4lx"
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8003)
+```
+
+---
+
+# ✅ Step 3 — Run all 3 services separately
+
+Open 3 terminals:
+
+---
+
+# Terminal 1
+
+```bash id="u1v7ke"
+python emotion.py
+```
+
+---
+
+# Terminal 2
+
+```bash id="x5p9dn"
+python genre.py
+```
+
+---
+
+# Terminal 3
+
+```bash id="k2w8ms"
+python gender.py
+```
+
+---
+
+# ✅ Step 4 — Verify each service
+
+Open browser:
+
+```text id="n4r1qb"
+http://127.0.0.1:8002/docs
+http://127.0.0.1:8001/docs
+http://127.0.0.1:8003/docs
+```
+
+Each should show:
+
+* Swagger UI
+* FastAPI endpoints
+
+---
+
+# 🎯 Then your FULL architecture becomes
+
+```text id="g7x3po"
+Frontend
+   ↓
+Node AI module
+   ↓
+emotion.py :8002
+genre.py   :8001
+gender.py  :8003
+```
+
+---
+
+# 🚀 VERY IMPORTANT architectural observation
+
+You have now accidentally created:
+
+```text id="s9m6vk"
+microservice-style AI inference decomposition
+```
+
+Even though locally.
+
+Each model:
+
+* isolated runtime
+* isolated dependency loading
+* isolated process
+* isolated port
+

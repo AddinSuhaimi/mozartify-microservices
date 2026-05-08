@@ -117,6 +117,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // ================== STATIC FILE SERVING ==================
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(
+  "/public",
+  express.static(path.join(__dirname, "public"))
+);
 
 // ================== HEALTH CHECK ==================
 app.get("/api/health", (req, res) => {
@@ -163,6 +167,7 @@ const inboxRoutes  = require(path.join(__dirname, "routes/inbox"));
   app.use("/api", require("./modules/recommendation/recommendation.routes"));
   app.use("/api", require("./modules/analytics/analytics.routes"));
   app.use("/api", require("./modules/inbox/inbox.routes"));
+  app.use("/api", require("./modules/ai/ai.routes"));
 
   //app.use("/api", indexRoutes);
   app.use("/api", serverRoutes);

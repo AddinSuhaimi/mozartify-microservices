@@ -1,3 +1,4 @@
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -12,6 +13,7 @@ import librosa
 from pydub import AudioSegment
 import io
 import random
+import uvicorn
 
 app = FastAPI()
 
@@ -25,9 +27,28 @@ app.add_middleware(
 
 
 # Load models once to avoid reloading them on every request
-model_spec_path = "C:/Users/ADMIN/OneDrive/Documents/GitHub/mozartify/fastapi-server/model/emotion/Conv2D_spec_agumented.h5"
-model_mfcc_path = "C:/Users/ADMIN/OneDrive/Documents/GitHub/mozartify/fastapi-server/model/emotion/Conv2D_mfcc_agumented.h5"
-model_mel_path = "C:/Users/ADMIN/OneDrive/Documents/GitHub/mozartify/fastapi-server/model/emotion/Conv2D_mel_agumented.h5"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_spec_path = os.path.join(
+    BASE_DIR,
+    "model",
+    "emotion",
+    "Conv2D_spec_agumented.h5"
+)
+
+model_mfcc_path = os.path.join(
+    BASE_DIR,
+    "model",
+    "emotion",
+    "Conv2D_mfcc_agumented.h5"
+)
+
+model_mel_path = os.path.join(
+    BASE_DIR,
+    "model",
+    "emotion",
+    "Conv2D_mel_agumented.h5"
+)
 
 try:
     model_spec = load_model(model_spec_path)
@@ -101,6 +122,8 @@ def prediction2d(file_content):
 
     return moodString(final_prediction)
 
+print("Reached route registration")
+
 @app.post("/predict-emotion")
 async def predict_from_url(request: FileUrlRequest):
     try:
@@ -127,3 +150,6 @@ async def predict_from_url(request: FileUrlRequest):
     except Exception as e:
         print("Error during prediction:", e)
         raise HTTPException(status_code=500, detail="Error during prediction")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8002)

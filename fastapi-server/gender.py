@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,6 +9,7 @@ import joblib
 import requests
 from io import BytesIO
 import sklearn
+import uvicorn
 
 app = FastAPI()
 
@@ -55,7 +58,14 @@ async def predict_gender(request: GenderPredictionRequest, chunk_duration: int =
         raise HTTPException(status_code=500, detail=f"Error downloading or loading audio file: {e}")
 
     # Load the gender classifier model
-    model_path = r"C:\Users\ADMIN\OneDrive\Documents\GitHub\mozartify\fastapi-server\model\gender\gender_classifier.pkl"
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(
+        BASE_DIR,
+        "model",
+        "gender",
+        "gender_classifier.pkl"
+    )
+    
     try:
         print(f"Loading gender classifier model from {model_path}...")
         model = joblib.load(model_path)
@@ -96,3 +106,6 @@ async def predict_gender(request: GenderPredictionRequest, chunk_duration: int =
     print(f"Final predicted gender: {gender}")
 
     return {"gender": gender}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8003)

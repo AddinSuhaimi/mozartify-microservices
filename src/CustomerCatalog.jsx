@@ -491,7 +491,7 @@ export default function CustomerCatalog() {
 
       // Call emotion prediction API
       const emotionResponse = await axios.post(
-        "http://127.0.0.1:5173/predict-emotion",
+        `${API_BASE_URL}/api/ai/predictEmotion`,
         { fileUrl }
       );
 
@@ -503,8 +503,8 @@ export default function CustomerCatalog() {
 
       // Call gender prediction API
       const genderResponse = await axios.post(
-        "http://127.0.0.1:9000/predict-gender",
-        { file_url: fileUrl }
+        `${API_BASE_URL}/api/ai/predictGender`,
+        { fileUrl }
       );
 
       // Update catalogData with the predicted gender
@@ -515,7 +515,7 @@ export default function CustomerCatalog() {
 
       // Call genre prediction API
       const genreResponse = await axios.post(
-        "http://127.0.0.1:8001/predict-genre",
+        `${API_BASE_URL}/api/ai/predictGenre`,
         { fileUrl }
       );
 
@@ -527,7 +527,7 @@ export default function CustomerCatalog() {
 
       // // Call instrument prediction API
       // const instrumentResponse = await axios.post(
-      //   "http://127.0.0.1:8000/predict-instrument",
+      //   `${API_BASE_URL}/api/ai/predictInstrument`,
       //   {
       //     fileUrl: fileUrl, // The URL of the MP3 file from Firebase
       //   }

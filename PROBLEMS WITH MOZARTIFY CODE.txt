@@ -294,3 +294,152 @@ Future enhancement:
 Stripe webhook → payment-service event orchestration
 
 can later evolve into a fully event-driven fulfillment architecture after microservice migration.
+
+8) Direct frontend-to-AI service coupling (bypassing backend orchestration)
+
+Problem:
+The frontend originally called FastAPI inference services directly:
+Frontend
+   ↓
+http://127.0.0.1:5173/predict-emotion
+
+instead of routing through the Node.js backend AI module.
+
+This caused:
+- frontend awareness of internal AI service topology
+- tight coupling between frontend and FastAPI ports/endpoints
+- bypassing of backend orchestration layer
+- duplicated infrastructure knowledge across frontend
+- weaker separation of concerns
+- inconsistent API architecture compared to other modules
+- inability to centralize AI request handling, logging, retries, or security
+
+Solution:
+Introduce the Node.js AI module as an orchestration/gateway layer between the frontend and FastAPI inference services.
+
+Refactoring actions:
+- create dedicated AI module (`ai.routes.js`, `ai.controller.js`, `ai.service.js`)
+- move FastAPI endpoint configuration into `ai.constants.js`
+- centralize axios-based AI inference orchestration inside `ai.service.js`
+- update frontend to call backend AI endpoints instead of FastAPI directly
+- isolate external AI service communication behind backend APIs
+
+Current architecture:
+Frontend
+   ↓
+Node.js AI module
+   ↓
+FastAPI inference services
+   ↓
+TensorFlow models
+
+
+instead of:
+Frontend
+   ↓
+FastAPI inference services
+
+What it does for the system:
+- centralizes AI orchestration logic
+- hides internal AI infrastructure from frontend
+- improves separation of concerns
+- prepares API gateway-style architecture
+- simplifies frontend/backend dependency management
+- improves scalability and maintainability
+- enables centralized monitoring, retries, caching, and security handling
+
+Sidenote (important for microservices):
+
+Current:
+Node.js AI module
+↓ HTTP
+FastAPI AI services
+
+After migration:
+API Gateway / AI Orchestrator Service
+↓
+distributed AI inference microservices
+
+This creates a cleaner service dependency graph and prepares the system for Kubernetes-based orchestration and independently scalable AI inference services.
+
+8.1) AI Models Deployment Pipeline
+
+The AI inference architecture was redesigned into a service-oriented deployment pipeline to improve modularity and future microservice scalability.
+
+Current architecture:
+Frontend
+   ↓
+Node.js Backend (API Gateway / Orchestrator)
+   ↓
+FastAPI AI Services
+   ↓
+TensorFlow Models (.h5)
+The frontend no longer communicates directly with the AI models. Instead, prediction requests are routed through the Node.js backend, which acts as an orchestration layer responsible for forwarding requests to the appropriate AI inference service.
+
+Each AI model operates as an independent FastAPI service:
+
+* Emotion prediction service
+* Genre prediction service
+* Gender prediction service
+
+Each service:
+
+* runs on its own port
+* loads its TensorFlow `.h5` model into memory during startup
+* exposes REST API endpoints for prediction requests
+
+During local development, the FastAPI services are executed independently through separate Python processes, simulating a distributed microservice deployment environment.
+
+BONUS: Simulation of Distributed Cloud Environment
+
+During development, there are multiple independent services running on separate ports, for example:
+Frontend          → localhost:5173
+Node Backend      → localhost:10000
+Emotion Service   → localhost:8002
+Genre Service     → localhost:8001
+Gender Service    → localhost:8003
+
+Each terminal represents:
+- an independent runtime
+- an isolated process
+- a separate service instance
+and they communicate with each other through HTTP requests.
+
+In cloud deployment terms, the local machine is currently simulating multiple deployed backend services
+similar to:
+Frontend container
+Backend API container
+Emotion AI container
+Genre AI container
+Gender AI container
+
+running separately in:
+- Docker containers
+- VMs
+- Kubernetes pods
+- cloud services
+
+
+# What makes this “microservice-like”
+| Characteristic                | Present? |
+| ----------------------------- | -------- |
+| Separate processes            | ✅        |
+| Separate ports                | ✅        |
+| HTTP communication            | ✅        |
+| Independent service startup   | ✅        |
+| Isolated runtime environments | ✅        |
+| Backend orchestration         | ✅        |
+
+This is fundamentally how distributed systems operate.
+
+# What changes in actual cloud deployment
+
+Locally:
+localhost:8002
+
+In cloud:
+https://emotion-service.up.railway.app
+
+or internal container networking.
+
+But architecturally, the communication pattern is the same.

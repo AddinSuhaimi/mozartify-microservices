@@ -52,7 +52,9 @@ def load_model(model_path):
     return model
 
 # Load the pre-trained model
-model = load_model("C:/Users/ADMIN/OneDrive/Documents/GitHub/mozartify/fastapi-server/model/instrument/Trained_model.h5")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "model", "instrument", "Trained_model.h5")
+model = load_model(model_path)
 
 # Define instrument classes
 classes = [

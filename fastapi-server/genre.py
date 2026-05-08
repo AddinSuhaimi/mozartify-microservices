@@ -7,10 +7,11 @@ import requests
 from io import BytesIO
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import uvicorn
 
 # Initialize FastAPI app
 app = FastAPI()
-
+    
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -20,8 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-current_directory = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(current_directory, "model", "genre", "Trained_model.h5")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "model", "genre", "Trained_model.h5")
 model = tf.keras.models.load_model(model_path)
 
 classes = ['Blues', 'Classical', 'Country', 'Disco', 'Hiphop', 'Jazz', 'Metal', 'Pop', 'Reggae', 'Rock']
@@ -128,3 +129,6 @@ async def predict_genre(request: FileUrlRequest) -> PredictionResponse:
         raise HTTPException(status_code=500, detail=f"Error downloading file: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+    
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8001)
