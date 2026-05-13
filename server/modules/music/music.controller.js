@@ -170,3 +170,113 @@ exports.setFavoritesMusic = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+exports.uploadMusicFile = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+    const result = await musicService.processMusicUpload(req.file);
+    res.json(result);
+  } catch (error) {
+    console.error(
+      "Error uploading music file:",
+      error
+    );
+    res.status(500).json({message: error.message});
+  }
+};
+
+// ABC File Management Controllers
+exports.getABCFiles = async (req, res) => {
+  try {
+    const { sortOrder = "desc", sortBy = "_id" } = req.query;
+    const abcFiles = await musicService.getABCFiles(sortOrder, sortBy);
+    res.status(200).json(abcFiles);
+  } catch (err) {
+    console.error("Error fetching ABC files:", err);
+    res.status(500).json({ message: "Error fetching files", error: err.message });
+  }
+};
+
+exports.getABCFileByIdentifier = async (req, res) => {
+  try {
+    const { identifier } = req.params;
+    const abcFile = await musicService.getABCFileByIdentifier(identifier);
+    res.status(200).json(abcFile);
+  } catch (err) {
+    console.error("Error fetching ABC file:", err);
+    if (err.message === "File not found") {
+      return res.status(404).json({ message: "File not found" });
+    }
+    res.status(500).json({ message: "Error fetching file", error: err.message });
+  }
+};
+
+exports.updateABCFileContent = async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const { content } = req.body;
+    const abcFile = await musicService.updateABCFileContent(filename, content);
+    res.status(200).json({ message: "ABC content updated successfully", abcFile });
+  } catch (err) {
+    console.error("Error updating ABC content:", err);
+    if (err.message === "File not found") {
+      return res.status(404).json({ message: "File not found" });
+    }
+    res.status(500).json({ message: "Error updating ABC content", error: err.message });
+  }
+};
+
+exports.getCatalogByFilename = async (req, res) => {
+  try {
+    const { fileName } = req.params;
+    const catalogData = await musicService.getCatalogByFilename(fileName);
+    res.status(200).json(catalogData);
+  } catch (err) {
+    console.error("Error fetching catalog data:", err);
+    if (err.message === "File not found") {
+      return res.status(404).json({ message: "File not found" });
+    }
+    res.status(500).json({ message: "Error fetching catalog data", error: err.message });
+  }
+};
+
+exports.saveCatalogMetadata = async (req, res) => {
+  try {
+    const { filename } = req.body;
+    const abcFile = await musicService.saveCatalogMetadata(filename, req.body);
+    res.status(200).json({ message: "Metadata saved successfully" });
+  } catch (err) {
+    console.error("Error saving catalog metadata:", err);
+    if (err.message === "Filename is required") {
+      return res.status(400).json({ message: "Filename is required" });
+    }
+    if (err.message === "File not found") {
+      return res.status(404).json({ message: "File not found" });
+    }
+    res.status(500).json({ message: "Error saving metadata", error: err.message });
+  }
+};
+
+exports.deleteAndTransferABCFile = async (req, res) => {
+  try {
+    const { filename } = req.body;
+    const deletedFile = await musicService.deleteAndTransferABCFile(filename);
+    res.status(200).json({
+      message: "File successfully transferred to deleted collection",
+      deletedFile,
+    });
+  } catch (err) {
+    console.error("Error in delete and transfer:", err);
+    if (err.message === "File not found") {
+      return res.status(404).json({ message: "File not found" });
+    }
+    res.status(500).json({
+      message: "Error transferring file to deleted collection",
+      error: err.message,
+    });
+  }
+};

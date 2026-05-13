@@ -1,6 +1,7 @@
 const ArtworkModel = require("../../models/Artwork");
 const Cart2Model = require("../../models/Cart2");
 const mongoose = require("mongoose");
+const ArtsDynamicField = require("../../models/ArtsDynamicField");
 
 exports.getArtworkRefineSearch = async () => {
   const sample = await ArtworkModel.findOne().lean();
@@ -261,4 +262,173 @@ exports.setFavoritesArtwork = async (userId, artworkId, action) => {
     message: "Favorite updated successfully",
     favorites_art: user.favorites_art,
   };
+};
+
+// Artwork Catalog Management Functions
+exports.createOrUpdateArtwork = async (artworkData) => {
+  const DeletedArtwork = require("../../models/DeletedArts.js");
+  const { _id, imageUrl, ...allFields } = artworkData;
+
+  if (_id) {
+    // Update existing artwork
+    const updateData = { ...allFields };
+    if (imageUrl !== undefined) {
+      updateData.imageUrl = imageUrl;
+    }
+
+    const artwork = await ArtworkModel.findByIdAndUpdate(_id, updateData, {
+      new: true,
+    });
+
+    if (!artwork) {
+      throw new Error("Artwork not found");
+    }
+
+    return artwork;
+  }
+
+  // Create new artwork
+  const artwork = new ArtworkModel({
+    ...allFields,
+    imageUrl,
+    dateUploaded: new Date(),
+  });
+
+  await artwork.save();
+  return artwork;
+};
+
+exports.getArtworkCatalogByIdentifier = async (identifier) => {
+  let artwork;
+
+  if (mongoose.Types.ObjectId.isValid(identifier)) {
+    artwork = await ArtworkModel.findById(identifier);
+  } else {
+    artwork = await ArtworkModel.findOne({ filename: identifier });
+  }
+
+  if (!artwork) {
+    throw new Error("Artwork not found");
+  }
+
+  return artwork;
+};
+
+exports.getAllArtworks = async () => {
+  const artworks = await ArtworkModel.find({ deleted: { $ne: true } });
+  return artworks;
+};
+
+exports.deleteArtwork = async (artworkId) => {
+  const DeletedArtwork = require("../../models/DeletedArts.js");
+
+  const artwork = await ArtworkModel.findById(artworkId);
+  if (!artwork) {
+    throw new Error("Artwork not found");
+  }
+
+  // Move to deleted collection
+  const deletedArtwork = new DeletedArtwork({
+    ...artwork.toObject(),
+    deletedAt: new Date(),
+  });
+  await deletedArtwork.save();
+
+  // Remove from active collection
+  await ArtworkModel.findByIdAndDelete(artworkId);
+
+  return { message: "Artwork deleted successfully" };
+};
+
+exports.getArtsDynamicFields = async () => {
+  return await ArtsDynamicField.find({
+    isActive: true,
+  }).sort({
+    displayOrder: 1,
+  });
+};
+
+exports.getArtsDynamicFieldById = async (fieldId) => {
+  const field =
+    await ArtsDynamicField.findById(
+      fieldId
+    );
+
+  if (!field) {
+    throw new Error(
+      "Dynamic field not found"
+    );
+  }
+
+  return field;
+};
+
+exports.createArtsDynamicField = async (fieldData) => {
+  const field =
+    new ArtsDynamicField(fieldData);
+
+  return await field.save();
+};
+
+exports.updateArtsDynamicField = async (fieldId, fieldData) => {
+  const updatedField =
+    await ArtsDynamicField.findByIdAndUpdate(
+      fieldId,
+      fieldData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+  if (!updatedField) {
+    throw new Error(
+      "Dynamic field not found"
+    );
+  }
+
+  return updatedField;
+};
+
+exports.deactivateArtsDynamicField = async (fieldId) => {
+  const field =
+    await ArtsDynamicField.findByIdAndUpdate(
+      fieldId,
+      { isActive: false },
+      { new: true }
+    );
+
+  if (!field) {
+    throw new Error(
+      "Dynamic field not found"
+    );
+  }
+
+  return field;
+};
+
+exports.getArtsDynamicFieldsByTab = async () => {
+  const fields =
+    await ArtsDynamicField.find({
+      isActive: true,
+    }).sort({
+      tabId: 1,
+      displayOrder: 1,
+    });
+
+  return fields.reduce(
+    (acc, field) => {
+      const tabId =
+        field.tabId || 0;
+
+      if (!acc[tabId]) {
+        acc[tabId] = [];
+      }
+
+      acc[tabId].push(field);
+
+      return acc;
+    },
+    {}
+  );
 };

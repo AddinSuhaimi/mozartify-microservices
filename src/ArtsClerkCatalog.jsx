@@ -297,7 +297,7 @@ export default function ArtsClerkCatalog() {
         setTabsData(fetchedTabs);
         
         // Fetch fields
-        const fieldsResponse = await axios.get(`${API_BASE_URL}/dynamic-fields`);
+        const fieldsResponse = await axios.get(`${API_BASE_URL}/arts-dynamic-fields`);
         const fetchedFields = fieldsResponse.data;
         setDynamicFields(fetchedFields);
 

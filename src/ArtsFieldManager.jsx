@@ -254,7 +254,7 @@ export default function DynamicFieldManager() {
       setTabs(fetchedTabs);
 
       // Then fetch fields
-      const response = await axios.get(`${API_BASE_URL}/dynamic-fields`);
+      const response = await axios.get(`${API_BASE_URL}/arts-dynamic-fields`);
       const fetchedFields = response.data;
       setFields(fetchedFields);
 
@@ -408,14 +408,14 @@ export default function DynamicFieldManager() {
       if (editingField) {
         // Update existing field
         response = await axios.put(
-          `${API_BASE_URL}/dynamic-fields/${editingField._id}`,
+          `${API_BASE_URL}/arts-dynamic-fields/${editingField._id}`,
           fieldToSave
         );
         showSnackbar("Field updated successfully");
       } else {
         // Create new field
         response = await axios.post(
-          `${API_BASE_URL}/dynamic-fields`,
+          `${API_BASE_URL}/arts-dynamic-fields`,
           fieldToSave
         );
         showSnackbar("Field created successfully");
@@ -603,12 +603,12 @@ export default function DynamicFieldManager() {
 
       // Update the two fields that changed positions
       await Promise.all([
-        axios.put(`${API_BASE_URL}/dynamic-fields/${field._id}`, {
+        axios.put(`${API_BASE_URL}/arts-dynamic-fields/${field._id}`, {
           ...field,
           displayOrder: targetIndex,
         }),
         axios.put(
-          `${API_BASE_URL}/dynamic-fields/${newOrder[currentIndex]._id}`,
+          `${API_BASE_URL}/arts-dynamic-fields/${newOrder[currentIndex]._id}`,
           {
             ...newOrder[currentIndex],
             displayOrder: currentIndex,
@@ -630,7 +630,7 @@ export default function DynamicFieldManager() {
   const handleToggleActive = async (field) => {
     try {
       setLoading(true);
-      await axios.put(`${API_BASE_URL}/dynamic-fields/${field._id}`, {
+      await axios.put(`${API_BASE_URL}/arts-dynamic-fields/${field._id}`, {
         ...field,
         isActive: !field.isActive,
       });

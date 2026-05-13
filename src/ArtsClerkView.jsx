@@ -295,7 +295,7 @@ export default function ArtsClerkView() {
   useEffect(() => {
     const fetchDynamicFields = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/dynamic-fields`);
+        const response = await axios.get(`${API_BASE_URL}/arts-dynamic-fields`);
         setDynamicFields(response.data);
       } catch (error) {
         console.error('Error fetching dynamic fields:', error);

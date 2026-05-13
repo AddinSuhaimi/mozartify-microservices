@@ -16,4 +16,18 @@ router.post("/add-to-cart-artwork", isAuthenticated, artsController.addToCart);
 router.delete("/remove-artwork-from-cart/:id", isAuthenticated, artsController.removeFromCart);
 router.post("/set-favorites-artwork", isAuthenticated, artsController.setFavoritesArtwork);
 
+// Artwork Catalog Routes
+router.post("/catalogArts", artsController.createOrUpdateArtwork);
+router.get("/catalogArts/:id", artsController.getArtworkCatalogByIdentifier);
+router.get("/catalogArts", artsController.getAllArtworks);
+router.delete("/catalogArts/:id", artsController.deleteArtwork);
+
+// Arts Dynamic Field Routes
+router.get("/arts-dynamic-fields", artsController.getArtsDynamicFields);
+router.get("/arts-dynamic-fields/by-tab", artsController.getArtsDynamicFieldsByTab);
+router.get("/arts-dynamic-fields/:id", artsController.getArtsDynamicFieldById);
+router.post("/arts-dynamic-fields", artsController.createArtsDynamicField);
+router.put("/arts-dynamic-fields/:id", artsController.updateArtsDynamicField);
+router.delete("/arts-dynamic-fields/:id", artsController.deactivateArtsDynamicField);
+
 module.exports = router;

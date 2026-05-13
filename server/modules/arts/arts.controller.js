@@ -170,3 +170,217 @@ exports.setFavoritesArtwork = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// Artwork Catalog Controllers
+exports.createOrUpdateArtwork = async (req, res) => {
+  try {
+    const artwork = await artsService.createOrUpdateArtwork(req.body);
+    const statusCode = req.body._id ? 200 : 201;
+    res.status(statusCode).json(artwork);
+  } catch (err) {
+    console.error("Error in /catalogArts:", err);
+    if (err.message === "Artwork not found") {
+      return res.status(404).json({ message: "Artwork not found" });
+    }
+    res.status(500).json({ message: "Error processing artwork", error: err.message });
+  }
+};
+
+exports.getArtworkCatalogByIdentifier = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const artwork = await artsService.getArtworkCatalogByIdentifier(id);
+    res.status(200).json(artwork);
+  } catch (err) {
+    console.error("Error fetching artwork:", err);
+    if (err.message === "Artwork not found") {
+      return res.status(404).json({ message: "Artwork not found" });
+    }
+    res.status(500).json({ message: "Error fetching artwork", error: err.message });
+  }
+};
+
+exports.getAllArtworks = async (req, res) => {
+  try {
+    const artworks = await artsService.getAllArtworks();
+    res.status(200).json(artworks);
+  } catch (err) {
+    console.error("Error fetching artworks:", err);
+    res.status(500).json({ message: "Error fetching artworks", error: err.message });
+  }
+};
+
+exports.deleteArtwork = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await artsService.deleteArtwork(id);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error deleting artwork:", err);
+    if (err.message === "Artwork not found") {
+      return res.status(404).json({ message: "Artwork not found" });
+    }
+    res.status(500).json({ message: "Error deleting artwork", error: err.message });
+  }
+};
+
+exports.getArtsDynamicFields = async (req, res) => {
+  try {
+    const fields =
+      await artsService.getArtsDynamicFields();
+
+    res.status(200).json(fields);
+  } catch (err) {
+    console.error(
+      "Error fetching dynamic fields:",
+      err
+    );
+
+    res.status(500).json({
+      message:
+        "Error fetching dynamic fields",
+      error: err.message,
+    });
+  }
+};
+
+exports.getArtsDynamicFieldById = async (req, res) => {
+  try {
+    const field =
+      await artsService.getArtsDynamicFieldById(
+        req.params.id
+      );
+
+    res.status(200).json(field);
+  } catch (err) {
+    console.error(
+      "Error fetching dynamic field:",
+      err
+    );
+
+    if (
+      err.message ===
+      "Dynamic field not found"
+    ) {
+      return res.status(404).json({
+        message:
+          "Dynamic field not found",
+      });
+    }
+
+    res.status(500).json({
+      message:
+        "Error fetching dynamic field",
+      error: err.message,
+    });
+  }
+};
+
+exports.createArtsDynamicField = async (req, res) => {
+  try {
+    const field =
+      await artsService.createArtsDynamicField(
+        req.body
+      );
+
+    res.status(201).json(field);
+  } catch (err) {
+    console.error(
+      "Error creating dynamic field:",
+      err
+    );
+
+    res.status(500).json({
+      message:
+        "Error creating dynamic field",
+      error: err.message,
+    });
+  }
+};
+
+exports.updateArtsDynamicField = async (req, res) => {
+  try {
+    const field =
+      await artsService.updateArtsDynamicField(
+        req.params.id,
+        req.body
+      );
+
+    res.status(200).json(field);
+  } catch (err) {
+    console.error(
+      "Error updating dynamic field:",
+      err
+    );
+
+    if (
+      err.message ===
+      "Dynamic field not found"
+    ) {
+      return res.status(404).json({
+        message:
+          "Dynamic field not found",
+      });
+    }
+
+    res.status(500).json({
+      message:
+        "Error updating dynamic field",
+      error: err.message,
+    });
+  }
+};
+
+exports.deactivateArtsDynamicField = async (req, res) => {
+  try {
+    await artsService.deactivateArtsDynamicField(
+      req.params.id
+    );
+
+    res.status(200).json({
+      message:
+        "Dynamic field deactivated successfully",
+    });
+  } catch (err) {
+    console.error(
+      "Error deactivating dynamic field:",
+      err
+    );
+
+    if (
+      err.message ===
+      "Dynamic field not found"
+    ) {
+      return res.status(404).json({
+        message:
+          "Dynamic field not found",
+      });
+    }
+
+    res.status(500).json({
+      message:
+        "Error deactivating dynamic field",
+      error: err.message,
+    });
+  }
+};
+
+exports.getArtsDynamicFieldsByTab = async (req, res) => {
+  try {
+    const fields =
+      await artsService.getArtsDynamicFieldsByTab();
+
+    res.status(200).json(fields);
+  } catch (err) {
+    console.error(
+      "Error fetching fields by tab:",
+      err
+    );
+
+    res.status(500).json({
+      message:
+        "Error fetching fields by tab",
+      error: err.message,
+    });
+  }
+};

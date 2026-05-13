@@ -17,7 +17,7 @@ const express = require("express");
 
 const isProduction = process.env.NODE_ENV === "production";
 const router = express.Router();
-
+/*
 // ================== FASTAPI ENDPOINT CONFIG ==================
 const FASTAPI_BASE_URL = isProduction
   ? process.env.FASTAPI_PROD_URL // Base URL for production
@@ -29,7 +29,8 @@ const fastApiEndpoints = {
   genre: `${FASTAPI_BASE_URL}:8001/predict-genre`,
   instrument: `${FASTAPI_BASE_URL}:8000/predict-instrument`,
 };
-
+*/
+/* REFACTORED INTO MUSIC MODULE
 // Configure file storage for uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -145,7 +146,8 @@ router.post("/upload", upload.single("file"), (req, res) => {
     });
   });
 });
-
+*/
+/* REFACTORED INTO AI MODULE
 // Endpoint to handle emotion prediction request based on Firebase URL
 router.post("/predictEmotion", async (req, res) => {
   const { fileUrl } = req.body;
@@ -215,7 +217,8 @@ router.post("/predictGenre", async (req, res) => {
 //     res.status(500).json({ message: 'Error predicting instrument', error: error.message });
 //   }
 // });
-
+*/
+/* REFACTORED INTO MUSIC MODULE
 // Additional endpoints
 router.get("/abc-file", async (req, res) => {
   try {
@@ -367,7 +370,8 @@ router.post("/delete-and-transfer-abc-file", async (req, res) => {
     });
   }
 });
-
+*/
+/* REFACTORED INTO ARTS MODULE
 //ARTS ENDPOINTS
 
 // Create a new artwork or update existing one
@@ -480,7 +484,8 @@ router.delete("/catalogArts/:id", async (req, res) => {
       .json({ message: "Error deleting artwork", error: err.message });
   }
 });
-
+*/
+/* REFACTORED INTO ARTS MODULE
 // ARTS DYNAMIC FIELD ENDPOINTS
 
 // GET all dynamic fields
@@ -595,7 +600,7 @@ router.get("/dynamic-fields/by-tab", async (req, res) => {
       .json({ message: "Error fetching fields by tab", error: err.message });
   }
 });
-
+*/
 // ========== ARTS TAB ENDPOINTS ==========
 
 // Get all tabs

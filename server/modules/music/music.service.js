@@ -1,5 +1,10 @@
 const ABCFileModel = require("../../models/ABCFile");
+const DeletedABCFile = require("../../models/deletedABCFile");
 const CartModel = require("../../models/Cart");
+const fs = require("fs");
+const path = require("path");
+const { exec } = require("child_process");
+const mongoose = require("mongoose");
 
 const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
   let conditions = [];
@@ -243,4 +248,190 @@ exports.setFavoritesMusic = async (userId, musicScoreId, action) => {
     message: "Favorite updated successfully",
     favorites_music: user.favorites_music,
   };
+};
+
+exports.processMusicUpload = async (file) => {
+  const inputFilePath = path.join(
+    __dirname,
+    "../../uploads",
+    file.filename
+  );
+
+  const outputDir = path.join(
+    __dirname,
+    "../../uploads",
+    `${path.parse(file.filename).name}`
+  );
+
+  const mxlFilePath = path.join(
+    outputDir,
+    `${path.parse(file.filename).name}.mxl`
+  );
+
+  const abcFilePath = path.join(
+    outputDir,
+    `${path.parse(file.filename).name}.abc`
+  );
+
+  await fs.promises.mkdir(outputDir, {
+    recursive: true,
+  });
+
+  console.log(
+    `Running Audiveris on file: ${inputFilePath}`
+  );
+
+  const audiverisCommand = `audiveris -batch -transcribe -export -output "${outputDir}" "${inputFilePath}"`;
+
+  await execPromise(audiverisCommand);
+
+  const xml2abcPath = path.resolve(
+    __dirname,
+    "../../node_modules/.bin/xml2abc"
+  );
+
+  const xml2abcCommand = `"${xml2abcPath}" -o "${outputDir}" "${mxlFilePath}"`;
+
+  await execPromise(xml2abcCommand);
+
+  const data =
+    await fs.promises.readFile(
+      abcFilePath,
+      "utf8"
+    );
+
+  const abcFile = new ABCFileModel({
+    filename: file.filename,
+    content: data,
+  });
+
+  await abcFile.save();
+
+  return {
+    filePath: `/uploads/${file.filename}`,
+
+    mxlFilePath: `/uploads/${
+      path.parse(file.filename).name
+    }/${
+      path.parse(file.filename).name
+    }.mxl`,
+
+    abcFilePath: `/uploads/${
+      path.parse(file.filename).name
+    }/${
+      path.parse(file.filename).name
+    }.abc`,
+
+    message:
+      "File uploaded and processed successfully",
+  };
+};
+
+const execPromise = (command) => {
+  return new Promise(
+    (resolve, reject) => {
+      exec(
+        command,
+        (error, stdout, stderr) => {
+          if (error) { return reject(error); }
+          resolve(stdout);
+        }
+      );
+    }
+  );
+};
+
+// ABC File Management Functions
+exports.getABCFiles = async (sortOrder = "desc", sortBy = "_id") => {
+  const mongoSortOrder = sortOrder === "asc" ? 1 : -1;
+
+  const abcFiles = await ABCFileModel.find({ deleted: false }).sort({
+    [sortBy]: mongoSortOrder,
+  });
+
+  return abcFiles;
+};
+
+exports.getABCFileByIdentifier = async (identifier) => {
+  let abcFile;
+
+  if (mongoose.Types.ObjectId.isValid(identifier)) {
+    abcFile = await ABCFileModel.findById(identifier);
+  } else {
+    abcFile = await ABCFileModel.findOne({ filename: identifier });
+  }
+
+  if (!abcFile) {
+    throw new Error("File not found");
+  }
+
+  return abcFile;
+};
+
+exports.updateABCFileContent = async (filename, content) => {
+  const abcFile = await ABCFileModel.findOneAndUpdate(
+    { filename },
+    { content },
+    { new: true }
+  );
+
+  if (!abcFile) {
+    throw new Error("File not found");
+  }
+
+  return abcFile;
+};
+
+exports.getCatalogByFilename = async (filename) => {
+  const catalogData = await ABCFileModel.findOne({ filename });
+
+  if (!catalogData) {
+    throw new Error("File not found");
+  }
+
+  return catalogData;
+};
+
+exports.saveCatalogMetadata = async (filename, metadata) => {
+  if (!filename) {
+    throw new Error("Filename is required");
+  }
+
+  const abcFile = await ABCFileModel.findOneAndUpdate(
+    { filename },
+    metadata,
+    { new: true, strict: false }
+  );
+
+  if (!abcFile) {
+    throw new Error("File not found");
+  }
+
+  return abcFile;
+};
+
+exports.deleteAndTransferABCFile = async (filename) => {
+  // Find the original file
+  const originalFile = await ABCFileModel.findOne({ filename });
+
+  if (!originalFile) {
+    throw new Error("File not found");
+  }
+
+  // Create a new document in the DeletedABCFile collection
+  const deletedFile = new DeletedABCFile({
+    ...originalFile.toObject(),
+    dateUploaded: originalFile.dateUploaded || new Date(),
+    deleted: true,
+    downloads: originalFile.downloads || 0,
+    downloadEvents: originalFile.downloadEvents || [],
+  });
+
+  // Save the file to the deleted collection
+  await deletedFile.save();
+
+  // Remove the original document
+  await ABCFileModel.findOneAndDelete({ filename });
+
+  return deletedFile;
 };
