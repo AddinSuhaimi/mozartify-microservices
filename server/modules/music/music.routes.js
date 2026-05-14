@@ -24,4 +24,21 @@ router.get("/catalog/:fileName", musicController.getCatalogByFilename);
 router.post("/catalog", musicController.saveCatalogMetadata);
 router.post("/delete-and-transfer-abc-file", musicController.deleteAndTransferABCFile);
 
+// Music Dynamic Field Routes
+router.get("/music-dynamic-fields", musicController.getMusicDynamicFields);
+router.get("/music-dynamic-fields/by-tab/:tabId", musicController.getMusicDynamicFieldsByTabId);
+router.get("/music-dynamic-fields/:id", musicController.getMusicDynamicFieldById);
+router.post("/music-dynamic-fields", musicController.createMusicDynamicField);
+router.put("/music-dynamic-fields/:id", musicController.updateMusicDynamicField);
+router.delete("/music-dynamic-fields/:id", musicController.deactivateMusicDynamicField);
+
+// Music Tab Routes
+router.get("/music-tabs", musicController.getAllMusicTabs);
+router.get("/music-tabs/:id", musicController.getMusicTabById);
+router.post("/music-tabs", musicController.createMusicTab);
+router.put("/music-tabs/:id", musicController.updateMusicTab);
+router.delete("/music-tabs/:id", musicController.deleteMusicTab);
+router.put("/music-tabs/reorder", musicController.reorderMusicTabs);
+router.post("/music-tabs/initialize", musicController.initializeDefaultMusicTabs);
+
 module.exports = router;

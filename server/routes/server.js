@@ -601,6 +601,7 @@ router.get("/dynamic-fields/by-tab", async (req, res) => {
   }
 });
 */
+/* REFACTORED INTO ARTS MODULE
 // ========== ARTS TAB ENDPOINTS ==========
 
 // Get all tabs
@@ -774,7 +775,8 @@ router.get("/dynamic-fields/by-tab/:tabId", async (req, res) => {
       .json({ message: "Error fetching fields by tab", error: err.message });
   }
 });
-
+*/
+/* REFACTORED INTO MUSIC MODULE
 // ========== MUSIC DYNAMIC FIELD ENDPOINTS ==========
 
 // Get all dynamic fields
@@ -1045,5 +1047,5 @@ router.post("/music-tabs/initialize", async (req, res) => {
       .json({ message: "Error initializing tabs", error: err.message });
   }
 });
-
+*/
 module.exports = router;

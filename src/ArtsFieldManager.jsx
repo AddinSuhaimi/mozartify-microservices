@@ -253,8 +253,8 @@ export default function DynamicFieldManager() {
       const fetchedTabs = tabResponse.data;
       setTabs(fetchedTabs);
 
-      // Then fetch fields
-      const response = await axios.get(`${API_BASE_URL}/arts-dynamic-fields`);
+      // Then fetch fields - include inactive fields in the manager
+      const response = await axios.get(`${API_BASE_URL}/arts-dynamic-fields?showInactive=true`);
       const fetchedFields = response.data;
       setFields(fetchedFields);
 

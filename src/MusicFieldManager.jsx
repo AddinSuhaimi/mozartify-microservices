@@ -265,7 +265,7 @@ export default function MusicDynamicFieldManager() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/music-dynamic-fields`
+        `${API_BASE_URL}/music-dynamic-fields?showInactive=true`
       );
       const fetchedFields = response.data;
       setFields(fetchedFields);
@@ -289,9 +289,29 @@ export default function MusicDynamicFieldManager() {
     }
   };
 
+  const fetchTabs = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/music-tabs`
+      );
+
+      const formattedTabs =
+        response.data.map((tab) => ({
+          id: tab.tabId,
+          name: tab.name,
+        }));
+
+      setTabs(formattedTabs);
+
+    } catch (error) {
+      console.error("Error fetching tabs:", error);
+    }
+  };
+
   // Initial data fetch
   useEffect(() => {
     fetchFields();
+    fetchTabs();
   }, []);
 
   // Handle drawer toggle
@@ -436,26 +456,20 @@ export default function MusicDynamicFieldManager() {
       showSnackbar("Tab name cannot be empty", "error");
       return;
     }
-
     try {
       setLoading(true);
+      await axios.post(
+        `${API_BASE_URL}/music-tabs`,
+        {
+          name: newTabName,
+        }
+      );
 
-      // Find the next available ID (max + 1)
-      const nextId = Math.max(...tabs.map((tab) => tab.id), -1) + 1;
-
-      // In a real application, you would save this to the backend
-      // const response = await axios.post(`${API_BASE_URL}/tabs`, { name: newTabName });
-
-      // Add new tab to local state
-      const newTab = { id: nextId, name: newTabName };
-      setTabs([...tabs, newTab]);
-
+      await fetchTabs();
       showSnackbar("Tab added successfully");
       setTabDialogOpen(false);
       setNewTabName("");
 
-      // Optionally switch to the new tab
-      setCurrentTab(nextId);
     } catch (error) {
       console.error("Error adding tab:", error);
       showSnackbar("Failed to add tab", "error");
@@ -467,27 +481,38 @@ export default function MusicDynamicFieldManager() {
   const handleUpdateTab = async () => {
     if (!editingTab) return;
     if (!newTabName.trim()) {
-      showSnackbar("Tab name cannot be empty", "error");
+      showSnackbar(
+        "Tab name cannot be empty",
+        "error"
+      );
       return;
     }
 
     try {
       setLoading(true);
-
-      // In a real application, you would save this to the backend
-      // await axios.put(`${API_BASE_URL}/tabs/${editingTab.id}`, { name: newTabName });
-
-      // Update local state
-      const updatedTabs = tabs.map((tab) =>
-        tab.id === editingTab.id ? { ...tab, name: newTabName } : tab
+      await axios.put(
+        `${API_BASE_URL}/music-tabs/${editingTab.id}`,
+        {
+          name: newTabName,
+        }
       );
 
-      setTabs(updatedTabs);
-      showSnackbar("Tab updated successfully");
+      await fetchTabs();
+      showSnackbar(
+        "Tab updated successfully"
+      );
+
       setTabDialogOpen(false);
+
     } catch (error) {
-      console.error("Error updating tab:", error);
-      showSnackbar("Failed to update tab", "error");
+      console.error(
+        "Error updating tab:",
+        error
+      );
+      showSnackbar(
+        "Failed to update tab",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -500,39 +525,23 @@ export default function MusicDynamicFieldManager() {
 
   const handleConfirmTabDelete = async () => {
     if (!tabToDelete) return;
-
     try {
       setLoading(true);
+      await axios.delete(
+        `${API_BASE_URL}/music-tabs/${tabToDelete.id}`
+      );
 
-      // Check if there are any fields in this tab
-      const fieldsInTab = fieldsByTab[tabToDelete.id] || [];
-      if (fieldsInTab.length > 0) {
-        showSnackbar(
-          "Cannot delete tab with fields. Please move or deactivate fields first.",
-          "error"
-        );
-        setTabDeleteDialogOpen(false);
-        setTabToDelete(null);
-        setLoading(false);
-        return;
-      }
-
-      // In a real application, you would delete from the backend
-      // await axios.delete(`${API_BASE_URL}/tabs/${tabToDelete.id}`);
-
-      // Remove from local state
-      const filteredTabs = tabs.filter((tab) => tab.id !== tabToDelete.id);
-      setTabs(filteredTabs);
-
-      // If the current tab is being deleted, switch to the first available tab
-      if (currentTab === tabToDelete.id && filteredTabs.length > 0) {
-        setCurrentTab(filteredTabs[0].id);
-      }
-
+      await fetchTabs();
+      await fetchFields();
       showSnackbar("Tab deleted successfully");
+
     } catch (error) {
       console.error("Error deleting tab:", error);
-      showSnackbar("Failed to delete tab", "error");
+      showSnackbar(
+        error.response?.data?.message ||
+        "Failed to delete tab",
+        "error"
+      );
     } finally {
       setLoading(false);
       setTabDeleteDialogOpen(false);

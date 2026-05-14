@@ -25,9 +25,19 @@ router.delete("/catalogArts/:id", artsController.deleteArtwork);
 // Arts Dynamic Field Routes
 router.get("/arts-dynamic-fields", artsController.getArtsDynamicFields);
 router.get("/arts-dynamic-fields/by-tab", artsController.getArtsDynamicFieldsByTab);
+router.get("/arts-dynamic-fields/by-tab/:tabId", artsController.getArtsDynamicFieldsByTabId);
 router.get("/arts-dynamic-fields/:id", artsController.getArtsDynamicFieldById);
 router.post("/arts-dynamic-fields", artsController.createArtsDynamicField);
 router.put("/arts-dynamic-fields/:id", artsController.updateArtsDynamicField);
 router.delete("/arts-dynamic-fields/:id", artsController.deactivateArtsDynamicField);
+
+// Arts Tab Routes
+router.get("/arts-tabs", artsController.getAllArtsTabs);
+router.get("/arts-tabs/:id", artsController.getArtsTabById);
+router.post("/arts-tabs", artsController.createArtsTab);
+router.put("/arts-tabs/:id", artsController.updateArtsTab);
+router.delete("/arts-tabs/:id", artsController.deleteArtsTab);
+router.put("/arts-tabs/reorder", artsController.reorderArtsTabs);
+router.post("/arts-tabs/initialize", artsController.initializeDefaultArtsTabs);
 
 module.exports = router;

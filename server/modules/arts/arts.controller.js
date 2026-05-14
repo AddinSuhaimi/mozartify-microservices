@@ -226,8 +226,9 @@ exports.deleteArtwork = async (req, res) => {
 
 exports.getArtsDynamicFields = async (req, res) => {
   try {
+    const { showInactive } = req.query;
     const fields =
-      await artsService.getArtsDynamicFields();
+      await artsService.getArtsDynamicFields(showInactive === 'true');
 
     res.status(200).json(fields);
   } catch (err) {
@@ -382,5 +383,116 @@ exports.getArtsDynamicFieldsByTab = async (req, res) => {
         "Error fetching fields by tab",
       error: err.message,
     });
+  }
+};
+
+exports.getArtsDynamicFieldsByTabId = async (req, res) => {
+  try {
+    const { tabId } = req.params;
+    const fields = await artsService.getArtsDynamicFieldsByTabId(tabId);
+    res.status(200).json(fields);
+  } catch (err) {
+    console.error("Error fetching fields by tab:", err);
+    res.status(500).json({
+      message: "Error fetching fields by tab",
+      error: err.message,
+    });
+  }
+};
+
+// ========== ARTS TAB CONTROLLERS ==========
+
+exports.getAllArtsTabs = async (req, res) => {
+  try {
+    const tabs = await artsService.getAllArtsTabs();
+    res.status(200).json(tabs);
+  } catch (err) {
+    console.error("Error fetching arts tabs:", err);
+    res.status(500).json({
+      message: "Error fetching arts tabs",
+      error: err.message,
+    });
+  }
+};
+
+exports.getArtsTabById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tab = await artsService.getArtsTabById(id);
+    res.status(200).json(tab);
+  } catch (err) {
+    console.error("Error fetching tab:", err);
+    if (err.message === "Tab not found") {
+      return res.status(404).json({ message: "Tab not found" });
+    }
+    res.status(500).json({ message: "Error fetching tab", error: err.message });
+  }
+};
+
+exports.createArtsTab = async (req, res) => {
+  try {
+    const newTab = await artsService.createArtsTab(req.body);
+    res.status(201).json(newTab);
+  } catch (err) {
+    console.error("Error creating tab:", err);
+    res.status(500).json({ message: "Error creating tab", error: err.message });
+  }
+};
+
+exports.updateArtsTab = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedTab = await artsService.updateArtsTab(id, req.body);
+    res.status(200).json(updatedTab);
+  } catch (err) {
+    console.error("Error updating tab:", err);
+    if (err.message === "Tab not found") {
+      return res.status(404).json({ message: "Tab not found" });
+    }
+    res.status(500).json({ message: "Error updating tab", error: err.message });
+  }
+};
+
+exports.deleteArtsTab = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await artsService.deleteArtsTab(id);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error deleting tab:", err);
+    if (err.message.includes("Cannot delete tab with fields")) {
+      return res.status(400).json({ message: err.message });
+    }
+    if (err.message === "Tab not found") {
+      return res.status(404).json({ message: "Tab not found" });
+    }
+    res.status(500).json({ message: "Error deleting tab", error: err.message });
+  }
+};
+
+exports.reorderArtsTabs = async (req, res) => {
+  try {
+    const { tabs } = req.body;
+    const updatedTabs = await artsService.reorderArtsTabs(tabs);
+    res.status(200).json(updatedTabs);
+  } catch (err) {
+    console.error("Error reordering tabs:", err);
+    if (err.message.includes("Invalid request format")) {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Error reordering tabs", error: err.message });
+  }
+};
+
+exports.initializeDefaultArtsTabs = async (req, res) => {
+  try {
+    const result = await artsService.initializeDefaultArtsTabs();
+    res.status(201).json(result);
+  } catch (err) {
+    console.error("Error initializing tabs:", err);
+    if (err.message === "Tabs are already initialized") {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Error initializing tabs", error: err.message });
   }
 };

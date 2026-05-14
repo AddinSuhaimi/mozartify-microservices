@@ -2,6 +2,7 @@ const ArtworkModel = require("../../models/Artwork");
 const Cart2Model = require("../../models/Cart2");
 const mongoose = require("mongoose");
 const ArtsDynamicField = require("../../models/ArtsDynamicField");
+const ArtsTab = require("../../models/ArtsTab");
 
 exports.getArtworkRefineSearch = async () => {
   const sample = await ArtworkModel.findOne().lean();
@@ -340,10 +341,9 @@ exports.deleteArtwork = async (artworkId) => {
   return { message: "Artwork deleted successfully" };
 };
 
-exports.getArtsDynamicFields = async () => {
-  return await ArtsDynamicField.find({
-    isActive: true,
-  }).sort({
+exports.getArtsDynamicFields = async (showInactive = false) => {
+  const query = showInactive ? {} : { isActive: true };
+  return await ArtsDynamicField.find(query).sort({
     displayOrder: 1,
   });
 };
@@ -431,4 +431,123 @@ exports.getArtsDynamicFieldsByTab = async () => {
     },
     {}
   );
+};
+
+// ========== ARTS TAB SERVICE FUNCTIONS ==========
+
+exports.getAllArtsTabs = async () => {
+  const tabs = await ArtsTab.find({}).sort({ displayOrder: 1 });
+  return tabs;
+};
+
+exports.getArtsTabById = async (tabId) => {
+  const tab = await ArtsTab.findOne({ tabId: tabId });
+  if (!tab) {
+    throw new Error("Tab not found");
+  }
+  return tab;
+};
+
+exports.createArtsTab = async (tabData) => {
+  // Find the highest tabId to ensure uniqueness
+  const highestTab = await ArtsTab.findOne().sort("-tabId");
+  const nextTabId = highestTab ? highestTab.tabId + 1 : 0;
+
+  // Find the highest displayOrder to add the new tab at the end
+  const lastTab = await ArtsTab.findOne().sort("-displayOrder");
+  const nextDisplayOrder = lastTab ? lastTab.displayOrder + 1 : 0;
+
+  const newTab = new ArtsTab({
+    ...tabData,
+    tabId: nextTabId,
+    displayOrder: nextDisplayOrder,
+  });
+
+  const savedTab = await newTab.save();
+  return savedTab;
+};
+
+exports.updateArtsTab = async (tabId, tabData) => {
+  const updatedTab = await ArtsTab.findOneAndUpdate(
+    { tabId: tabId },
+    tabData,
+    { new: true, runValidators: true }
+  );
+  if (!updatedTab) {
+    throw new Error("Tab not found");
+  }
+  return updatedTab;
+};
+
+exports.deleteArtsTab = async (tabId) => {
+  // Check if there are ACTIVE fields in this tab
+  const fieldsInTab =
+    await ArtsDynamicField.countDocuments({
+      tabId: tabId,
+      isActive: true,
+    });
+
+  if (fieldsInTab > 0) {
+    throw new Error(
+      "Cannot delete tab with active fields. Please move or deactivate fields first."
+    );
+  }
+
+  const deletedTab =
+    await ArtsTab.findOneAndDelete({
+      tabId: tabId,
+    });
+
+  if (!deletedTab) {
+    throw new Error("Tab not found");
+  }
+
+  return {
+    message: "Tab deleted successfully",
+  };
+};
+
+exports.reorderArtsTabs = async (tabs) => {
+  if (!Array.isArray(tabs)) {
+    throw new Error("Invalid request format. Expected array of tabs.");
+  }
+
+  // Update each tab's display order
+  const updatePromises = tabs.map((tab, index) =>
+    ArtsTab.findOneAndUpdate(
+      { tabId: tab.tabId },
+      { displayOrder: index },
+      { new: true }
+    )
+  );
+
+  const updatedTabs = await Promise.all(updatePromises);
+  return updatedTabs;
+};
+
+exports.initializeDefaultArtsTabs = async () => {
+  const existingTabs = await ArtsTab.countDocuments();
+
+  if (existingTabs > 0) {
+    throw new Error("Tabs are already initialized");
+  }
+
+  const defaultTabs = [
+    { tabId: 0, name: "Identification", displayOrder: 0 },
+    { tabId: 1, name: "Date", displayOrder: 1 },
+    { tabId: 2, name: "Additional Info", displayOrder: 2 },
+    { tabId: 3, name: "Image", displayOrder: 3 },
+  ];
+
+  await ArtsTab.insertMany(defaultTabs);
+  return { message: "Default tabs initialized successfully" };
+};
+
+exports.getArtsDynamicFieldsByTabId = async (tabId) => {
+  const fields = await ArtsDynamicField.find({
+    tabId: parseInt(tabId),
+    isActive: true,
+  }).sort({ displayOrder: 1 });
+
+  return fields;
 };

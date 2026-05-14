@@ -280,3 +280,184 @@ exports.deleteAndTransferABCFile = async (req, res) => {
     });
   }
 };
+
+// ========== MUSIC DYNAMIC FIELD CONTROLLERS ==========
+
+exports.getMusicDynamicFields = async (req, res) => {
+  try {
+    const { showInactive } = req.query;
+    const fields = await musicService.getMusicDynamicFields(showInactive === 'true');
+    res.status(200).json(fields);
+  } catch (err) {
+    console.error("Error fetching music dynamic fields:", err);
+    res.status(500).json({
+      message: "Error fetching music dynamic fields",
+      error: err.message,
+    });
+  }
+};
+
+exports.getMusicDynamicFieldById = async (req, res) => {
+  try {
+    const field = await musicService.getMusicDynamicFieldById(req.params.id);
+    res.status(200).json(field);
+  } catch (err) {
+    console.error("Error fetching dynamic field:", err);
+    if (err.message === "Dynamic field not found") {
+      return res.status(404).json({ message: "Dynamic field not found" });
+    }
+    res.status(500).json({ message: "Error fetching dynamic field", error: err.message });
+  }
+};
+
+exports.createMusicDynamicField = async (req, res) => {
+  try {
+    const newField = await musicService.createMusicDynamicField(req.body);
+    res.status(201).json(newField);
+  } catch (err) {
+    console.error("Error creating dynamic field:", err);
+    res.status(500).json({ message: "Error creating dynamic field", error: err.message });
+  }
+};
+
+exports.updateMusicDynamicField = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedField = await musicService.updateMusicDynamicField(id, req.body);
+    res.status(200).json(updatedField);
+  } catch (err) {
+    console.error("Error updating dynamic field:", err);
+    if (err.message === "Dynamic field not found") {
+      return res.status(404).json({ message: "Dynamic field not found" });
+    }
+    res.status(500).json({ message: "Error updating dynamic field", error: err.message });
+  }
+};
+
+exports.deactivateMusicDynamicField = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await musicService.deactivateMusicDynamicField(id);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error deactivating dynamic field:", err);
+    if (err.message === "Dynamic field not found") {
+      return res.status(404).json({ message: "Dynamic field not found" });
+    }
+    res.status(500).json({
+      message: "Error deactivating dynamic field",
+      error: err.message,
+    });
+  }
+};
+
+exports.getMusicDynamicFieldsByTabId = async (req, res) => {
+  try {
+    const { tabId } = req.params;
+    const fields = await musicService.getMusicDynamicFieldsByTabId(tabId);
+    res.status(200).json(fields);
+  } catch (err) {
+    console.error("Error fetching fields by tab:", err);
+    res.status(500).json({
+      message: "Error fetching fields by tab",
+      error: err.message,
+    });
+  }
+};
+
+// ========== MUSIC TAB CONTROLLERS ==========
+
+exports.getAllMusicTabs = async (req, res) => {
+  try {
+    const tabs = await musicService.getAllMusicTabs();
+    res.status(200).json(tabs);
+  } catch (err) {
+    console.error("Error fetching music tabs:", err);
+    res.status(500).json({
+      message: "Error fetching music tabs",
+      error: err.message,
+    });
+  }
+};
+
+exports.getMusicTabById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tab = await musicService.getMusicTabById(id);
+    res.status(200).json(tab);
+  } catch (err) {
+    console.error("Error fetching tab:", err);
+    if (err.message === "Tab not found") {
+      return res.status(404).json({ message: "Tab not found" });
+    }
+    res.status(500).json({ message: "Error fetching tab", error: err.message });
+  }
+};
+
+exports.createMusicTab = async (req, res) => {
+  try {
+    const newTab = await musicService.createMusicTab(req.body);
+    res.status(201).json(newTab);
+  } catch (err) {
+    console.error("Error creating tab:", err);
+    res.status(500).json({ message: "Error creating tab", error: err.message });
+  }
+};
+
+exports.updateMusicTab = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedTab = await musicService.updateMusicTab(id, req.body);
+    res.status(200).json(updatedTab);
+  } catch (err) {
+    console.error("Error updating tab:", err);
+    if (err.message === "Tab not found") {
+      return res.status(404).json({ message: "Tab not found" });
+    }
+    res.status(500).json({ message: "Error updating tab", error: err.message });
+  }
+};
+
+exports.deleteMusicTab = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await musicService.deleteMusicTab(id);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error deleting tab:", err);
+    if (err.message.includes("Cannot delete tab with fields")) {
+      return res.status(400).json({ message: err.message });
+    }
+    if (err.message === "Tab not found") {
+      return res.status(404).json({ message: "Tab not found" });
+    }
+    res.status(500).json({ message: "Error deleting tab", error: err.message });
+  }
+};
+
+exports.reorderMusicTabs = async (req, res) => {
+  try {
+    const { tabs } = req.body;
+    const updatedTabs = await musicService.reorderMusicTabs(tabs);
+    res.status(200).json(updatedTabs);
+  } catch (err) {
+    console.error("Error reordering tabs:", err);
+    if (err.message.includes("Invalid request format")) {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Error reordering tabs", error: err.message });
+  }
+};
+
+exports.initializeDefaultMusicTabs = async (req, res) => {
+  try {
+    const result = await musicService.initializeDefaultMusicTabs();
+    res.status(201).json(result);
+  } catch (err) {
+    console.error("Error initializing tabs:", err);
+    if (err.message === "Tabs are already initialized") {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Error initializing tabs", error: err.message });
+  }
+};

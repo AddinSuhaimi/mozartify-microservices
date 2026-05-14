@@ -1,6 +1,8 @@
 const ABCFileModel = require("../../models/ABCFile");
 const DeletedABCFile = require("../../models/deletedABCFile");
 const CartModel = require("../../models/Cart");
+const MusicDynamicField = require("../../models/MusicDynamicField");
+const MusicTab = require("../../models/MusicTab");
 const fs = require("fs");
 const path = require("path");
 const { exec } = require("child_process");
@@ -434,4 +436,167 @@ exports.deleteAndTransferABCFile = async (filename) => {
   await ABCFileModel.findOneAndDelete({ filename });
 
   return deletedFile;
+};
+
+// ========== MUSIC DYNAMIC FIELD SERVICE FUNCTIONS ==========
+
+exports.getMusicDynamicFields = async (showInactive = false) => {
+  const query = showInactive ? {} : { isActive: true };
+  return await MusicDynamicField.find(query).sort({
+    tabId: 1,
+    displayOrder: 1,
+  });
+};
+
+exports.getMusicDynamicFieldById = async (fieldId) => {
+  const field = await MusicDynamicField.findById(fieldId);
+  if (!field) {
+    throw new Error("Dynamic field not found");
+  }
+  return field;
+};
+
+exports.createMusicDynamicField = async (fieldData) => {
+  const newField = new MusicDynamicField(fieldData);
+  const savedField = await newField.save();
+  return savedField;
+};
+
+exports.updateMusicDynamicField = async (fieldId, fieldData) => {
+  const updatedField = await MusicDynamicField.findByIdAndUpdate(
+    fieldId,
+    fieldData,
+    { new: true, runValidators: true }
+  );
+  if (!updatedField) {
+    throw new Error("Dynamic field not found");
+  }
+  return updatedField;
+};
+
+exports.deactivateMusicDynamicField = async (fieldId) => {
+  const field = await MusicDynamicField.findByIdAndUpdate(
+    fieldId,
+    { isActive: false },
+    { new: true }
+  );
+  if (!field) {
+    throw new Error("Dynamic field not found");
+  }
+  return { message: "Dynamic field deactivated successfully" };
+};
+
+exports.getMusicDynamicFieldsByTabId = async (tabId) => {
+  const fields = await MusicDynamicField.find({
+    tabId: tabId,
+    isActive: true,
+  }).sort({ displayOrder: 1 });
+  return fields;
+};
+
+// ========== MUSIC TAB SERVICE FUNCTIONS ==========
+
+exports.getAllMusicTabs = async () => {
+  const tabs = await MusicTab.find({}).sort({ displayOrder: 1 });
+  return tabs;
+};
+
+exports.getMusicTabById = async (tabId) => {
+  const tab = await MusicTab.findOne({ tabId: tabId });
+  if (!tab) {
+    throw new Error("Tab not found");
+  }
+  return tab;
+};
+
+exports.createMusicTab = async (tabData) => {
+  // Find the highest tabId to ensure uniqueness
+  const highestTab = await MusicTab.findOne().sort("-tabId");
+  const nextTabId = highestTab ? highestTab.tabId + 1 : 0;
+
+  // Find the highest displayOrder to add the new tab at the end
+  const lastTab = await MusicTab.findOne().sort("-displayOrder");
+  const nextDisplayOrder = lastTab ? lastTab.displayOrder + 1 : 0;
+
+  const newTab = new MusicTab({
+    ...tabData,
+    tabId: nextTabId,
+    displayOrder: nextDisplayOrder,
+  });
+
+  const savedTab = await newTab.save();
+  return savedTab;
+};
+
+exports.updateMusicTab = async (tabId, tabData) => {
+  const updatedTab = await MusicTab.findOneAndUpdate(
+    { tabId: tabId },
+    tabData,
+    { new: true, runValidators: true }
+  );
+  if (!updatedTab) {
+    throw new Error("Tab not found");
+  }
+  return updatedTab;
+};
+
+exports.deleteMusicTab = async (tabId) => {
+  // Check if there are any fields in this tab
+  const fieldsInTab = await MusicDynamicField.countDocuments({
+    tabId: tabId,
+    isActive: true,
+  });
+
+  if (fieldsInTab > 0) {
+    throw new Error("Cannot delete tab with fields. Please move or deactivate fields first.");
+  }
+
+  const deletedTab = await MusicTab.findOneAndDelete({ tabId: tabId });
+
+  if (!deletedTab) {
+    throw new Error("Tab not found");
+  }
+
+  return { message: "Tab deleted successfully" };
+};
+
+exports.reorderMusicTabs = async (tabs) => {
+  if (!Array.isArray(tabs)) {
+    throw new Error("Invalid request format. Expected array of tabs.");
+  }
+
+  // Update each tab's display order
+  const updatePromises = tabs.map((tab, index) =>
+    MusicTab.findOneAndUpdate(
+      { tabId: tab.tabId },
+      { displayOrder: index },
+      { new: true }
+    )
+  );
+
+  const updatedTabs = await Promise.all(updatePromises);
+  return updatedTabs;
+};
+
+exports.initializeDefaultMusicTabs = async () => {
+  const existingTabs = await MusicTab.countDocuments();
+
+  if (existingTabs > 0) {
+    throw new Error("Tabs are already initialized");
+  }
+
+  const defaultTabs = [
+    { tabId: 0, name: "Identification", displayOrder: 0 },
+    { tabId: 1, name: "Creators", displayOrder: 1 },
+    { tabId: 2, name: "Dates", displayOrder: 2 },
+    { tabId: 3, name: "Content", displayOrder: 3 },
+    { tabId: 4, name: "Format", displayOrder: 4 },
+    { tabId: 5, name: "Rights", displayOrder: 5 },
+    { tabId: 6, name: "Geography", displayOrder: 6 },
+    { tabId: 7, name: "Performance", displayOrder: 7 },
+    { tabId: 8, name: "Related Work", displayOrder: 8 },
+  ];
+
+  await MusicTab.insertMany(defaultTabs);
+  return { message: "Default tabs initialized successfully" };
 };
