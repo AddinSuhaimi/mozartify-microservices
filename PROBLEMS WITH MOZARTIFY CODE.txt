@@ -443,3 +443,111 @@ https://emotion-service.up.railway.app
 or internal container networking.
 
 But architecturally, the communication pattern is the same.
+
+9) Soft-delete inconsistency in dynamic field management
+
+Problem:
+The dynamic field system used soft deletion through the `isActive` flag.
+However, the frontend only fetched active fields:
+GET /dynamic-fields
+→ returns only isActive: true
+
+When a field was deactivated:
+- it disappeared from the frontend immediately
+- but still existed in the database
+- clerks could no longer reactivate the field through the UI
+
+This created inconsistent behavior where deactivated fields behaved like permanently deleted fields in the frontend, despite still existing in MongoDB.
+
+Solution:
+Introduce optional inactive field retrieval for admin management views.
+
+Refactoring actions:
+- modify `getArtsDynamicFields()` and `getMusicDynamicFields` to support:
+  `?showInactive=true`
+- update the frontend field manager to request all fields
+- retain active-only filtering for normal artwork forms
+- keep inactive fields visible and toggleable in the admin UI
+
+Current behavior:
+- admin field manager → shows active + inactive fields
+- artwork forms → show active fields only
+- deactivated fields can now be reactivated directly from the frontend
+
+What it does for the system:
+- implements proper soft-delete behavior
+- prevents hidden unrecoverable records
+- improves usability
+- aligns frontend and backend data semantics
+- creates more consistent field lifecycle management
+
+10) Replacing unstable Windows-based xml2abc CLI conversion with a Python-based MusicXML parser and converter
+
+Problem:
+The original pipeline attempted to convert `.mxl` files into `.abc` notation using the Node.js `xml2abc` CLI package:
+Audiveris → xml2abc CLI → ABC
+
+This caused multiple issues on Windows:
+- `xml2abc` executable not recognized
+- `npx` spawning failures (`ENOENT`, `EINVAL`)
+- shell parsing problems with file paths
+- `.cmd` execution inconsistencies
+- async timing issues causing `.abc` files to be read before creation
+- dependency instability across environments
+- unreliable child process execution in Node.js
+
+This resulted in:
+- failed ABC conversion despite successful Audiveris OCR
+- inconsistent cross-platform behavior
+- fragile orchestration pipeline
+- excessive debugging overhead related to shell execution instead of actual music processing
+
+Solution:
+Replace the external CLI-based conversion step with a custom Python-based MusicXML parser and ABC generator.
+
+Current architecture:
+Audiveris → Python MusicXML Parser → ABC
+
+
+Refactoring actions:
+- remove dependency on Node.js `xml2abc`
+- create custom `musicxml_to_abc.py`
+- use Python `zipfile` to extract `.mxl` archives
+- parse MusicXML directly using `xml.etree.ElementTree`
+- generate ABC notation internally from parsed notes/rests/durations
+- invoke Python script from Node.js backend through controlled subprocess execution
+- support both `.mxl` and plain `.xml` MusicXML formats
+
+What it does for the system:
+- eliminates unstable Windows CLI execution issues
+- removes dependency on `npx` and shell-specific behavior
+- improves cross-platform reliability
+- centralizes notation conversion logic into a controlled implementation
+- provides cleaner error handling and debugging
+- improves maintainability and extensibility of the music processing pipeline
+- stabilizes end-to-end OCR → MusicXML → ABC conversion
+
+Current processing pipeline:
+Uploaded PDF/Image
+        ↓
+Audiveris OCR
+        ↓
+MusicXML (.mxl)
+        ↓
+Python conversion service
+        ↓
+ABC notation (.abc)
+        ↓
+MongoDB storage
+
+Sidenote (important for future microservices):
+
+Current:
+Node.js backend
+↓ subprocess
+Python conversion script
+
+After migration:
+music-processing-service
+↓
+dedicated notation-conversion microservice

@@ -550,7 +550,7 @@ export default function MusicDynamicFieldManager() {
   };
 
   // Functions to reorder tabs
-  const handleReorderTab = (tabId, direction) => {
+  const handleReorderTab = async (tabId, direction) => {
     const tabIndex = tabs.findIndex((tab) => tab.id === tabId);
     if (
       (direction === "up" && tabIndex === 0) ||
@@ -568,8 +568,27 @@ export default function MusicDynamicFieldManager() {
       newTabs[tabIndex],
     ];
 
-    setTabs(newTabs);
-    showSnackbar("Tab order updated");
+    try {
+      setLoading(true);
+      // Convert tabs to format expected by backend (with tabId property)
+      const tabsForApi = newTabs.map((tab) => ({
+        tabId: tab.id,
+        name: tab.name,
+      }));
+
+      // Send reorder request to backend
+      await axios.put(`${API_BASE_URL}/music-tabs/reorder`, {
+        tabs: tabsForApi,
+      });
+
+      setTabs(newTabs);
+      showSnackbar("Tab order updated successfully");
+    } catch (error) {
+      console.error("Error reordering tabs:", error);
+      showSnackbar("Failed to update tab order", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Move field up or down in display order

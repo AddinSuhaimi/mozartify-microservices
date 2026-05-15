@@ -33,11 +33,11 @@ router.delete("/arts-dynamic-fields/:id", artsController.deactivateArtsDynamicFi
 
 // Arts Tab Routes
 router.get("/arts-tabs", artsController.getAllArtsTabs);
-router.get("/arts-tabs/:id", artsController.getArtsTabById);
 router.post("/arts-tabs", artsController.createArtsTab);
-router.put("/arts-tabs/:id", artsController.updateArtsTab);
-router.delete("/arts-tabs/:id", artsController.deleteArtsTab);
 router.put("/arts-tabs/reorder", artsController.reorderArtsTabs);
 router.post("/arts-tabs/initialize", artsController.initializeDefaultArtsTabs);
+router.get("/arts-tabs/:id", artsController.getArtsTabById);
+router.put("/arts-tabs/:id", artsController.updateArtsTab);
+router.delete("/arts-tabs/:id", artsController.deleteArtsTab);
 
 module.exports = router;

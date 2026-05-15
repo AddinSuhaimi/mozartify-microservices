@@ -5,7 +5,7 @@ const MusicDynamicField = require("../../models/MusicDynamicField");
 const MusicTab = require("../../models/MusicTab");
 const fs = require("fs");
 const path = require("path");
-const { exec } = require("child_process");
+const { exec, execFile } = require("child_process");
 const mongoose = require("mongoose");
 
 const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
@@ -283,18 +283,39 @@ exports.processMusicUpload = async (file) => {
     `Running Audiveris on file: ${inputFilePath}`
   );
 
-  const audiverisCommand = `audiveris -batch -transcribe -export -output "${outputDir}" "${inputFilePath}"`;
+  const audiverisPath = `"C:\\Program Files\\Audiveris\\Audiveris.exe"`;
 
+  const audiverisCommand = `${audiverisPath} -batch -transcribe -export -output "${outputDir}" "${inputFilePath}"`;
+  const execPromise = (command) => {
+    return new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+
+        console.log("STDOUT:");
+        console.log(stdout);
+
+        console.log("STDERR:");
+        console.log(stderr);
+
+        if (error) {
+          reject(error);
+        } else {
+          resolve(stdout);
+        }
+      });
+    });
+  };
   await execPromise(audiverisCommand);
 
-  const xml2abcPath = path.resolve(
+  // Convert MXL to ABC using Python script (music21 library) 
+  // This is more reliable than the Node.js xml2abc package 
+  const pythonScript = path.join(
     __dirname,
-    "../../node_modules/.bin/xml2abc"
+    "./xml2abc.py"
   );
 
-  const xml2abcCommand = `"${xml2abcPath}" -o "${outputDir}" "${mxlFilePath}"`;
+  const abcCommand = `python "${pythonScript}" -o "${outputDir}" "${mxlFilePath}"`;
 
-  await execPromise(xml2abcCommand);
+  await execPromise(abcCommand);
 
   const data =
     await fs.promises.readFile(
@@ -307,6 +328,9 @@ exports.processMusicUpload = async (file) => {
     content: data,
   });
 
+  console.log("Saving ABC document:", {
+    filename: file.filename,
+  });
   await abcFile.save();
 
   return {
@@ -356,13 +380,13 @@ exports.getABCFiles = async (sortOrder = "desc", sortBy = "_id") => {
 
 exports.getABCFileByIdentifier = async (identifier) => {
   let abcFile;
-
+  console.log("Requested identifier:", identifier);
   if (mongoose.Types.ObjectId.isValid(identifier)) {
     abcFile = await ABCFileModel.findById(identifier);
   } else {
     abcFile = await ABCFileModel.findOne({ filename: identifier });
   }
-
+  console.log("Mongo result:", abcFile);
   if (!abcFile) {
     throw new Error("File not found");
   }

@@ -34,11 +34,11 @@ router.delete("/music-dynamic-fields/:id", musicController.deactivateMusicDynami
 
 // Music Tab Routes
 router.get("/music-tabs", musicController.getAllMusicTabs);
-router.get("/music-tabs/:id", musicController.getMusicTabById);
 router.post("/music-tabs", musicController.createMusicTab);
-router.put("/music-tabs/:id", musicController.updateMusicTab);
-router.delete("/music-tabs/:id", musicController.deleteMusicTab);
 router.put("/music-tabs/reorder", musicController.reorderMusicTabs);
 router.post("/music-tabs/initialize", musicController.initializeDefaultMusicTabs);
+router.get("/music-tabs/:id", musicController.getMusicTabById);
+router.put("/music-tabs/:id", musicController.updateMusicTab);
+router.delete("/music-tabs/:id", musicController.deleteMusicTab);
 
 module.exports = router;
