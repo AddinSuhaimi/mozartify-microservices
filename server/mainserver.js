@@ -123,6 +123,7 @@ app.use(
 );
 
 // ================== HEALTH CHECK ==================
+/*
 app.get("/api/health", (req, res) => {
   res.json({
     status: "healthy",
@@ -140,23 +141,11 @@ app.get("/api/health", (req, res) => {
     backend: "https://mozartify.onrender.com/api",
   });
 });
-
+*/
 
 // ================== LOAD ROUTE MODULES (NOT APPS) ==================
 try {
   console.log("🔄 Loading route modules...");
-
-const indexRoutes  = require(path.join(__dirname, "routes/index"));
-  console.log("✅ Index routes loaded");
-
-const adminRoutes  = require(path.join(__dirname, "routes/admin"));
-  console.log("✅ Admin routes loaded");
-
-const serverRoutes = require(path.join(__dirname, "routes/server"));
-  console.log("✅ Server routes loaded");
-
-const inboxRoutes  = require(path.join(__dirname, "routes/inbox"));
-  console.log("✅ Inbox routes loaded");
 
   app.use("/api", require("./modules/notification/notification.routes"));
   app.use("/api", require("./modules/auth/auth.routes"));
@@ -168,12 +157,6 @@ const inboxRoutes  = require(path.join(__dirname, "routes/inbox"));
   app.use("/api", require("./modules/analytics/analytics.routes"));
   app.use("/api", require("./modules/inbox/inbox.routes"));
   app.use("/api", require("./modules/ai/ai.routes"));
-
-  // app.use("/api", indexRoutes);
-  // app.use("/api", serverRoutes);
-
-  // app.use("/api", inboxRoutes);
-  // app.use("/api", adminRoutes);
 
   console.log("✅ All route modules mounted successfully");
 } catch (error) {
