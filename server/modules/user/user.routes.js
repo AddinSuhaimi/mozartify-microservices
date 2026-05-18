@@ -1,7 +1,7 @@
 console.log("✅ User routes loaded");
 const router = require("express").Router();
 const userController = require("./user.controller");
-const { isAuthenticated } = require("../auth/middleware/auth.middleware");
+const { isAuthenticated } = require("../../shared/auth/auth.middleware");
 const upload = require("../../shared/upload/upload.middleware");
 
 router.get("/preferences-options", userController.getMusicPreferencesOptions);

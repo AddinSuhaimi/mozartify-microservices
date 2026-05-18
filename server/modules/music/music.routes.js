@@ -1,7 +1,7 @@
 console.log("✅ Music routes loaded");
 const router = require("express").Router();
 const musicController = require("./music.controller");
-const { isAuthenticated } = require("../auth/middleware/auth.middleware");
+const { isAuthenticated } = require("../../shared/auth/auth.middleware");
 const upload = require("./music.upload");
 const uploadCatalog = require("../../shared/upload/upload.middleware");
 

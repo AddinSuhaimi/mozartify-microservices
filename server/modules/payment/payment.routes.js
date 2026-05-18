@@ -1,7 +1,7 @@
 console.log("✅ Payment routes loaded");
 const router = require("express").Router();
 const paymentController = require("./payment.controller");
-const { isAuthenticated } = require("../auth/middleware/auth.middleware");
+const { isAuthenticated } = require("../../shared/auth/auth.middleware");
 const bodyParser = require("body-parser");
 
 router.get("/user-purchases", isAuthenticated, paymentController.getUserPurchases);

@@ -1,7 +1,7 @@
 console.log("✅ Arts routes loaded");
 const router = require("express").Router();
 const artsController = require("./arts.controller");
-const { isAuthenticated } = require("../auth/middleware/auth.middleware");
+const { isAuthenticated } = require("../../shared/auth/auth.middleware");
 const upload = require("../../shared/upload/upload.middleware");
 
 router.get("/artwork-refine-search", artsController.getArtworkRefineSearch);
