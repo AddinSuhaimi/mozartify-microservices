@@ -551,3 +551,15 @@ After migration:
 music-processing-service
 ↓
 dedicated notation-conversion microservice
+
+11) Refactored frontend upload architecture to backend-managed Firebase uploads
+
+- Removed direct Firebase upload dependency from frontend profile picture flow
+- Created centralized upload infrastructure using shared upload middleware and upload service
+- Backend now handles Firebase upload logic instead of frontend
+- Implemented `/user/upload-profile-picture` endpoint in User module
+- Upload flow now: Frontend → Backend API → Firebase → Database update
+- Reused existing `updateProfilePicture()` service method to avoid duplicate logic
+- Frontend now sends files using `multipart/form-data` instead of Firebase SDK calls
+- Improved modular monolith architecture by separating upload infrastructure from business logic
+- Prepared system for future storage migration (e.g. Firebase → S3/local storage) with minimal frontend changes

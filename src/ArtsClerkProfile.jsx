@@ -29,8 +29,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { storage } from "./firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
@@ -278,36 +276,56 @@ export default function ArtsClerkProfile() {
 
   const handleUpdateProfilePicture = async () => {
     if (!profilePictureFile) return;
-
     try {
-      const storageRef = ref(
-        storage,
-        `profile_pictures/${Date.now()}_${profilePictureFile.name}`
-      );
-      await uploadBytes(storageRef, profilePictureFile);
-      const profilePictureUrl = await getDownloadURL(storageRef);
+      const formData =
+        new FormData();
 
-      await axios.put(`${API_BASE_URL}/user/update-profile-picture`, {
-        profile_picture_url: profilePictureUrl,
-      });
+      formData.append(
+        "file",
+        profilePictureFile
+      );
+      formData.append(
+        "userId",
+        currentUser._id
+      );
+
+      const response =
+        await axios.post(
+          `${API_BASE_URL}/user/upload-profile-picture`,
+          formData,
+          {
+            headers: {
+              "Content-Type":
+                "multipart/form-data",
+            },
+          }
+        );
+
+      const profilePictureUrl =
+        response.data.profile_picture_url;
 
       setCurrentUser((prev) => ({
         ...prev,
-        profile_picture: profilePictureUrl,
+        profile_picture:
+          profilePictureUrl,
       }));
+
       setEditDialogOpen(false);
+
       showDialog({
         title: "Success",
-        content: "Profile picture updated successfully!",
+        content:
+          "Profile picture updated successfully!",
         confirmText: "OK",
-        confirmAction: () => setDialogOpen(false),
       });
+
     } catch (error) {
+      console.error(error);
       showDialog({
         title: "Error",
-        content: "Failed to update profile picture",
+        content:
+          "Failed to update profile picture",
         confirmText: "OK",
-        confirmAction: () => setDialogOpen(false),
       });
     }
   };

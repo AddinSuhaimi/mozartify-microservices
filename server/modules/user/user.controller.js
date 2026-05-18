@@ -339,3 +339,47 @@ exports.addToDeletedUsers = async (req, res) => {
     res.status(500).json({ error: "Failed to add user to deletedusers" });
   }
 };
+
+exports.uploadProfilePicture = async (req, res) => {
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message:
+          "No file uploaded",
+      });
+    }
+
+    const userId =
+      req.user?.id ||
+      req.body.userId;
+
+    const updatedUser =
+      await userService.uploadProfilePicture(
+        userId,
+        req.file
+      );
+
+    res.status(200).json({
+      message:
+        "Profile picture uploaded successfully",
+
+      profile_picture_url:
+        updatedUser.profile_picture,
+    });
+
+  } catch (err) {
+
+    console.error(
+      "Error uploading profile picture:",
+      err
+    );
+
+    res.status(500).json({
+      message:
+        "Failed to upload profile picture",
+      error:
+        err.message,
+    });
+  }
+};

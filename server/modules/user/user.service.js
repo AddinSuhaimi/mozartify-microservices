@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const UserModel = require("../../models/User");
 const DeletedUserModel = require("../../models/DeletedUser");
 const bcrypt = require("bcryptjs");
+const uploadService = require("../../shared/upload/upload.service");
 
 const SALT_ROUNDS = 10;
 
@@ -228,6 +229,18 @@ exports.changePassword = async (userId, currentPassword, newPassword) => {
   await user.save();
 };
 
+exports.uploadProfilePicture = async (userId, file) => {
+  const profilePictureUrl =
+    await uploadService.uploadFileToFirebase(
+      file,
+      "profile_pictures"
+    );
+
+  return await exports.updateProfilePicture(
+    userId,
+    profilePictureUrl
+  );
+};
 
 exports.updateProfilePicture = async (userId, profilePictureUrl) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {

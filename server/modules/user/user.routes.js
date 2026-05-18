@@ -2,6 +2,7 @@ console.log("✅ User routes loaded");
 const router = require("express").Router();
 const userController = require("./user.controller");
 const { isAuthenticated } = require("../auth/middleware/auth.middleware");
+const upload = require("../../shared/upload/upload.middleware");
 
 router.get("/preferences-options", userController.getMusicPreferencesOptions);
 router.get("/art-preferences-options", userController.getArtPreferencesOptions);
@@ -13,6 +14,7 @@ router.get("/user-composed-scores", isAuthenticated, userController.getUserCompo
 router.delete("/user/delete", isAuthenticated, userController.deleteUser);
 router.put("/user/update-username", isAuthenticated, userController.updateUsername);
 router.put("/user/change-password", isAuthenticated, userController.changePassword);
+router.post("/user/upload-profile-picture", upload.single("file"), userController.uploadProfilePicture);
 router.put("/user/update-profile-picture", isAuthenticated, userController.updateProfilePicture);
 
 // ========== ADMIN USER MANAGEMENT ROUTES ==========
