@@ -421,10 +421,10 @@ export default function MusicEntryClerkCatalog() {
       }));
 
       // Upload file to Firebase Storage
-      // const storageRef = ref(storage, `mp3_file/${file.name}`);
-      // await uploadBytes(storageRef, file);
-      //const fileUrl = await getDownloadURL(storageRef);
-      const fileUrl = "http://localhost:10000/public/test-audio/test1.mp3";
+      const storageRef = ref(storage, `mp3_file/${file.name}`);
+      await uploadBytes(storageRef, file);
+      const fileUrl = await getDownloadURL(storageRef);
+      //const fileUrl = "http://localhost:10000/public/test-audio/test1.mp3";
       // Update catalogData with Firebase URL and filename
       setCatalogData((prevData) => ({
         ...prevData,

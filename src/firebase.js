@@ -5,13 +5,13 @@ import { getFirestore } from "firebase/firestore"; // Add Firestore import
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBfHPgqOS2bGpOePBbTQtVhS4pElGTVZqc",
-  authDomain: "mozartify.firebaseapp.com",
-  projectId: "mozartify",
-  storageBucket: "mozartify.appspot.com",
-  messagingSenderId: "856218081350",
-  appId: "1:856218081350:web:698ccb314fab40c6a49247",
-  measurementId: "G-3T0PHBKGWZ",
+  apiKey: "AIzaSyCwdW3h8j1MuS3dJyiMGR4sVA4gwuLETho",
+  authDomain: "mozartify-msa.firebaseapp.com",
+  projectId: "mozartify-msa",
+  storageBucket: "mozartify-msa.firebasestorage.app",
+  messagingSenderId: "288015855448",
+  appId: "1:288015855448:web:d44fc228c147750f61bf2d",
+  measurementId: "G-2LC2VRY7QH"
 };
 
 // Initialize Firebase
