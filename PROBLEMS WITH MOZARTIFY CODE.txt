@@ -552,14 +552,82 @@ music-processing-service
 ↓
 dedicated notation-conversion microservice
 
-11) Refactored frontend upload architecture to backend-managed Firebase uploads
+11) Refactoring frontend-managed Firebase uploads into backend-managed upload architecture
 
-- Removed direct Firebase upload dependency from frontend profile picture flow
-- Created centralized upload infrastructure using shared upload middleware and upload service
-- Backend now handles Firebase upload logic instead of frontend
-- Implemented `/user/upload-profile-picture` endpoint in User module
-- Upload flow now: Frontend → Backend API → Firebase → Database update
-- Reused existing `updateProfilePicture()` service method to avoid duplicate logic
-- Frontend now sends files using `multipart/form-data` instead of Firebase SDK calls
-- Improved modular monolith architecture by separating upload infrastructure from business logic
-- Prepared system for future storage migration (e.g. Firebase → S3/local storage) with minimal frontend changes
+Problem:
+The original system allowed multiple frontend components to directly interact with Firebase Storage using the Firebase SDK:
+Frontend → Firebase Storage → Backend Database Update
+
+This caused several architectural issues:
+- Firebase logic duplicated across many frontend components
+- frontend tightly coupled to Firebase implementation
+- upload logic scattered throughout the UI layer
+- difficult to maintain and debug upload-related issues
+- storage provider could not be changed without modifying frontend code
+- inconsistent upload handling between modules
+
+This resulted in:
+- poor separation of concerns
+- increased frontend complexity
+- duplicated upload code across profile, arts, and music modules
+- limited scalability for future microservices migration
+
+Solution:
+Refactor the upload flow so that all uploads are handled centrally by the backend using a shared upload service.
+
+Current architecture:
+Frontend
+↓
+Backend Upload Endpoint
+↓
+Shared Upload Service
+↓
+Firebase Storage
+↓
+MongoDB Update
+
+Refactoring actions:
+- create centralized `shared/upload` infrastructure
+- implement reusable `upload.middleware.js` using Multer
+- implement reusable `upload.service.js` for Firebase uploads
+- create backend-managed upload endpoints inside modules
+- remove direct Firebase upload calls from frontend components
+- replace frontend `uploadBytes()` and `getDownloadURL()` usage with API requests
+- refactor profile picture upload flow into `/user/upload-profile-picture`
+- reuse existing `updateProfilePicture()` service logic to avoid duplication
+
+What it does for the system:
+- centralizes upload logic into backend infrastructure
+- improves modular monolith architecture
+- reduces frontend complexity
+- decouples frontend from Firebase implementation
+- improves maintainability and scalability
+- prepares system for future migration to other storage providers (e.g. S3, local storage)
+- aligns upload architecture with future microservices design
+
+Current upload pipeline:
+Frontend File Upload
+↓
+Backend API Endpoint
+↓
+Shared Upload Service
+↓
+Firebase Storage
+↓
+MongoDB Database Update
+
+Sidenote (important for future microservices):
+
+Current:
+Frontend
+↓
+Node.js backend upload service
+↓
+Firebase Storage
+
+After migration:
+API Gateway
+↓
+dedicated file-upload microservice
+↓
+cloud storage provider

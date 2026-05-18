@@ -281,6 +281,57 @@ exports.deleteAndTransferABCFile = async (req, res) => {
   }
 };
 
+exports.uploadCoverImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message:
+          "No file uploaded",
+      });
+    }
+    const fileUrl = await musicService.uploadCoverImage(req.file);
+
+    res.status(200).json({
+      message: "Cover image uploaded successfully",
+      fileUrl,
+    });
+
+  } catch (err) {
+    console.error("Error uploading cover image:", err);
+    res.status(500).json({
+      message: "Failed to upload cover image",
+      error: err.message,
+    });
+  }
+};
+
+exports.uploadMp3 = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message:
+          "No file uploaded",
+      });
+    }
+    const fileUrl = await musicService.uploadMp3(req.file);
+
+    res.status(200).json({
+      message: "MP3 uploaded successfully",
+      fileUrl,
+    });
+
+  } catch (err) {
+    console.error(
+      "Error uploading MP3:",
+      err
+    );
+    res.status(500).json({
+      message: "Failed to upload MP3",
+      error: err.message,
+    });
+  }
+};
+
 // ========== MUSIC DYNAMIC FIELD CONTROLLERS ==========
 
 exports.getMusicDynamicFields = async (req, res) => {

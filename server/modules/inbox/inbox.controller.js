@@ -289,3 +289,37 @@ exports.markArtworkFeedbackReadByAdmin = async (req, res) => {
     });
   }
 };
+
+exports.uploadFeedbackAttachment = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message:
+          "No file uploaded",
+      });
+    }
+    const fileUrl =
+      await inboxService.uploadFeedbackAttachment(
+        req.file
+      );
+
+    res.status(200).json({
+      message:
+        "Attachment uploaded successfully",
+
+      fileUrl,
+    });
+
+  } catch (err) {
+    console.error(
+      "Error uploading feedback attachment:",
+      err
+    );
+    res.status(500).json({
+      message:
+        "Failed to upload attachment",
+      error:
+        err.message,
+    });
+  }
+};

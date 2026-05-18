@@ -3,6 +3,7 @@ const router = require("express").Router();
 const musicController = require("./music.controller");
 const { isAuthenticated } = require("../auth/middleware/auth.middleware");
 const upload = require("./music.upload");
+const uploadCatalog = require("../../shared/upload/upload.middleware");
 
 router.get("/refine-search", musicController.getMusicRefineSearch);
 router.post("/search-music", musicController.searchMusic);
@@ -23,6 +24,8 @@ router.put("/abc-file/:filename/content", musicController.updateABCFileContent);
 router.get("/catalog/:fileName", musicController.getCatalogByFilename);
 router.post("/catalog", musicController.saveCatalogMetadata);
 router.post("/delete-and-transfer-abc-file", musicController.deleteAndTransferABCFile);
+router.post("/music/upload-cover-image", uploadCatalog.single("file"), musicController.uploadCoverImage);
+router.post("/music/upload-mp3", uploadCatalog.single("file"), musicController.uploadMp3);
 
 // Music Dynamic Field Routes
 router.get("/music-dynamic-fields", musicController.getMusicDynamicFields);

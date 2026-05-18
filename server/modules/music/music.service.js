@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const { exec, execFile } = require("child_process");
 const mongoose = require("mongoose");
+const uploadService = require("../../shared/upload/upload.service");
 
 const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
   let conditions = [];
@@ -460,6 +461,28 @@ exports.deleteAndTransferABCFile = async (filename) => {
   await ABCFileModel.findOneAndDelete({ filename });
 
   return deletedFile;
+};
+
+exports.uploadCoverImage = async (file) => {
+
+  const fileUrl =
+    await uploadService.uploadFileToFirebase(
+      file,
+      "cover_images"
+    );
+
+  return fileUrl;
+};
+
+exports.uploadMp3 = async (file) => {
+
+  const fileUrl =
+    await uploadService.uploadFileToFirebase(
+      file,
+      "mp3_file"
+    );
+
+  return fileUrl;
 };
 
 // ========== MUSIC DYNAMIC FIELD SERVICE FUNCTIONS ==========

@@ -32,8 +32,6 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import CustomerSidebar from "./CustomerSidebar";
-import { storage } from "./firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -431,26 +429,48 @@ export default function CustomerCatalog() {
   useEffect(() => {}, [openDialog, dialogTitle, dialogMessage]);
 
   // Modify handleCoverImageChange
-  const handleCoverImageChange = (e) => {
+  const handleCoverImageChange = async (e) => {
     if (e.target.files[0]) {
-      const file = e.target.files[0];
-      const storageRef = ref(storage, `cover_images/${file.name}`);
-      uploadBytes(storageRef, file)
-        .then((snapshot) => {
-          return getDownloadURL(snapshot.ref);
-        })
-        .then((url) => {
-          setCoverImageUrl(url);
-          setCatalogData((prevData) => ({
+      try {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response =
+          await axios.post(
+            `${API_BASE_URL}/music/upload-cover-image`,
+            formData,
+            {
+              headers: {
+                "Content-Type":
+                  "multipart/form-data",
+              },
+            }
+          );
+
+        const url =response.data.fileUrl;
+        setCoverImageUrl(url);
+
+        setCatalogData(
+          (prevData) => ({
             ...prevData,
             coverImageUrl: url,
-          }));
-          showDialog("Uploaded", "Cover image uploaded successfully!");
-        })
-        .catch((error) => {
-          console.error("Error uploading cover image:", error);
-          showDialog("Error", "Failed to upload cover image", false);
-        });
+          })
+        );
+
+        showDialog("Uploaded", "Cover image uploaded successfully!");
+
+      } catch (error) {
+        console.error(
+          "Error uploading cover image:",
+          error
+        );
+        showDialog(
+          "Error",
+          "Failed to upload cover image",
+          false
+        );
+      }
     }
   };
 
@@ -478,9 +498,22 @@ export default function CustomerCatalog() {
       }));
 
       // Upload file to Firebase Storage
-      const storageRef = ref(storage, `mp3_file/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const fileUrl = await getDownloadURL(storageRef);
+      const formData = new FormData();
+      formData.append("file",file);
+
+      const uploadResponse =
+        await axios.post(
+          `${API_BASE_URL}/music/upload-mp3`,
+          formData,
+          {
+            headers: {
+              "Content-Type":
+                "multipart/form-data",
+            },
+          }
+        );
+
+      const fileUrl =uploadResponse.data.fileUrl;
 
       // Update catalogData with Firebase URL and filename
       setCatalogData((prevData) => ({

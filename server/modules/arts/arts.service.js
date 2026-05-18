@@ -3,6 +3,7 @@ const Cart2Model = require("../../models/Cart2");
 const mongoose = require("mongoose");
 const ArtsDynamicField = require("../../models/ArtsDynamicField");
 const ArtsTab = require("../../models/ArtsTab");
+const uploadService = require("../../shared/upload/upload.service");
 
 exports.getArtworkRefineSearch = async () => {
   const sample = await ArtworkModel.findOne().lean();
@@ -318,6 +319,46 @@ exports.getArtworkCatalogByIdentifier = async (identifier) => {
 exports.getAllArtworks = async () => {
   const artworks = await ArtworkModel.find({ deleted: { $ne: true } });
   return artworks;
+};
+
+exports.uploadArtwork = async (file) => {
+  const imageUrl =
+    await uploadService.uploadFileToFirebase(
+      file,
+      "artworks"
+    );
+
+  const artwork =
+    new ArtworkModel({
+
+      imageUrl,
+
+      title:
+        `Untitled Artwork ${Date.now()}`,
+
+      artist:
+        "Unknown Artist",
+
+      collection:
+        "Uncategorized",
+
+      price: 0,
+    });
+
+  await artwork.save();
+
+  return artwork;
+};
+
+exports.uploadArtworkImage = async (file) => {
+
+  const imageUrl =
+    await uploadService.uploadFileToFirebase(
+      file,
+      "artworks"
+    );
+
+  return imageUrl;
 };
 
 exports.deleteArtwork = async (artworkId) => {

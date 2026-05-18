@@ -2,6 +2,7 @@ console.log("✅ Arts routes loaded");
 const router = require("express").Router();
 const artsController = require("./arts.controller");
 const { isAuthenticated } = require("../auth/middleware/auth.middleware");
+const upload = require("../../shared/upload/upload.middleware");
 
 router.get("/artwork-refine-search", artsController.getArtworkRefineSearch);
 router.post("/search-artwork", artsController.searchArtwork);
@@ -21,6 +22,8 @@ router.post("/catalogArts", artsController.createOrUpdateArtwork);
 router.get("/catalogArts/:id", artsController.getArtworkCatalogByIdentifier);
 router.get("/catalogArts", artsController.getAllArtworks);
 router.delete("/catalogArts/:id", artsController.deleteArtwork);
+router.post("/arts/upload-artwork", upload.single("file"), artsController.uploadArtwork);
+router.post("/arts/upload-artwork-image", upload.single("file"), artsController.uploadArtworkImage);
 
 // Arts Dynamic Field Routes
 router.get("/arts-dynamic-fields", artsController.getArtsDynamicFields);

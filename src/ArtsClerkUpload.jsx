@@ -24,7 +24,6 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { createGlobalStyle } from "styled-components";
 import ClerkSidebar from "./ArtsClerkSidebar";
 import ImportIcon from "./assets/import-icon.png";
-import { storage, ref, uploadBytesResumable, getDownloadURL } from "./firebase";
 import { API_BASE_URL} from './config/api.js';
 
 const DRAWER_WIDTH = 225;
@@ -214,59 +213,69 @@ export default function ArtsClerkUpload() {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleUpload = async () => {
+ const handleUpload = async () => {
     if (!selectedFile) {
-      setDialogMessage("Please select a file first!");
+      setDialogMessage(
+        "Please select a file first!"
+      );
       setDialogOpen(true);
       return;
     }
-  
     setIsUploading(true);
     setUploadProgress(0);
-  
-    // Firebase upload logic
-    const storageRef = ref(storage, `artworks/${Date.now()}_${selectedFile.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-  
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        // Track upload progress
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        // Handle errors
-        setIsUploading(false);
-        setDialogMessage("Error uploading file. Please try again.");
-        setDialogOpen(true);
-        console.error("Error uploading file:", error);
-      },
-      async () => {
-        // Upload completed successfully
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-  
-        // Save artwork metadata to the backend
-        try {
-          const response = await axios.post(`${API_BASE_URL}/catalogArts`, {
-            imageUrl: downloadURL,
-          });
-  
-          // Navigate to the Catalog Page with the artwork ID
-          navigate(`/arts-clerk-catalog/${response.data._id}`, {
-            state: {
-              imageUrl: downloadURL,
+
+    try {
+      const formData = new FormData();
+      formData.append(
+        "file",
+        selectedFile
+      );
+
+      const response = await axios.post(
+        `${API_BASE_URL}/arts/upload-artwork`,
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+
+          onUploadProgress:
+            (progressEvent) => {
+              const progress =
+                (
+                  progressEvent.loaded /
+                  progressEvent.total
+                ) * 100;
+              setUploadProgress(
+                progress
+              );
             },
-          });
-        } catch (error) {
-          console.error("Error saving artwork metadata:", error);
-          setDialogMessage("Error saving artwork metadata. Please try again.");
-          setDialogOpen(true);
-        } finally {
-          setIsUploading(false);
+          }
+        );
+
+      navigate(
+        `/arts-clerk-catalog/${response.data.artworkId}`,
+        {
+          state: {
+            imageUrl:
+              response.data.imageUrl,
+          },
         }
-      }
-    );
+      );
+
+    } catch (error) {
+      console.error(
+        "Error uploading artwork:",
+        error
+      );
+      setDialogMessage(
+        "Error uploading artwork. Please try again."
+      );
+      setDialogOpen(true);
+    } finally {
+      setIsUploading(false);
+    }
   };
   
   return (

@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import CustomerSidebar from "./CustomerSidebar";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   Box,
   Typography,
@@ -236,15 +235,27 @@ const CustomerInbox = () => {
     setPage(newPage);
   };
 
-  const uploadImageToFirebase = async (file) => {
-    const storage = getStorage();
-    const timestamp = Date.now();
-    const fileName = `feedback_attachments/${timestamp}_${file.name}`;
-    const storageRef = ref(storage, fileName);
+  const uploadImage = async (file) => {
+    const formData = new FormData();
 
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
+    formData.append(
+      "file",
+      file
+    );
+
+    const response =
+      await axios.post(
+        `${API_BASE_URL}/upload-feedback-attachment`,
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
+      );
+
+    return response.data.fileUrl;
   };
 
   const [snackbar, setSnackbar] = useState({
@@ -453,7 +464,7 @@ const CustomerInbox = () => {
     try {
       let attachmentUrl = null;
       if (image) {
-        attachmentUrl = await uploadImageToFirebase(image);
+        attachmentUrl = await uploadImage(image);
       }
 
       const feedbackData = {

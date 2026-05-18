@@ -210,6 +210,61 @@ exports.getAllArtworks = async (req, res) => {
   }
 };
 
+exports.uploadArtwork = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message:
+          "No file uploaded",
+      });
+    }
+    const artwork = await artsService.uploadArtwork(req.file);
+    res.status(201).json({
+      message:
+        "Artwork uploaded successfully",
+      artworkId:
+        artwork._id,
+      imageUrl:
+        artwork.imageUrl,
+    });
+
+  } catch (err) {
+    console.error("Error uploading artwork:",err);
+    res.status(500).json({
+      message:
+        "Failed to upload artwork",
+      error:
+        err.message,
+    });
+  }
+};
+
+exports.uploadArtworkImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+    const imageUrl = await artsService.uploadArtworkImage(req.file);
+
+    res.status(200).json({
+      message: "Artwork image uploaded successfully",
+      imageUrl,
+    });
+
+  } catch (err) {
+    console.error(
+      "Error uploading artwork image:",
+      err
+    );
+    res.status(500).json({
+      message: "Failed to upload artwork image",
+      error: err.message,
+    });
+  }
+};
+
 exports.deleteArtwork = async (req, res) => {
   try {
     const { id } = req.params;

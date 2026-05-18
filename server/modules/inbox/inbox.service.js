@@ -1,5 +1,6 @@
 const Feedback = require("../../models/Feedback");
 const Feedback2 = require("../../models/Feedback2");
+const uploadService = require("../../shared/upload/upload.service");
 
 exports.getPendingFeedbacks = async () => {
   const pendingFeedbacks = await Feedback.find({ status: "pending" });
@@ -247,4 +248,14 @@ exports.markArtworkFeedbackReadByAdmin = async (feedbackId) => {
   return {
     message: "Feedback marked as read by admin",
   };
+};
+
+exports.uploadFeedbackAttachment = async (file) => {
+  const fileUrl =
+    await uploadService.uploadFileToFirebase(
+      file,
+      "feedback_attachments"
+    );
+
+  return fileUrl;
 };
