@@ -17,7 +17,6 @@ const ArtworkSchema = new mongoose.Schema({
   artist: { type: String, required: true},
   price: { type: String, required: true },
   collection: { type: String, required: true },
-  imageUrl: { type: String, required: true },
   medium: { type: String, required: false},
   partner: { type: String, required: false},
   downloads: { type: Number, required: false},
