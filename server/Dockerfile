@@ -20,8 +20,8 @@ COPY . .
 EXPOSE 10000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:10000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://127.0.0.1:10000/api/health || exit 1
 
 # Start application
 CMD ["node", "mainserver.js"]

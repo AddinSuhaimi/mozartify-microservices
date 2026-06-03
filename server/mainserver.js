@@ -123,7 +123,6 @@ app.use(
 );
 
 // ================== HEALTH CHECK ==================
-/*
 app.get("/api/health", (req, res) => {
   res.json({
     status: "healthy",
@@ -135,32 +134,50 @@ app.get("/api/health", (req, res) => {
       server: "running",
       sessions: "enabled",
     },
-    routes: ["index", "admin", "server", "inbox"],
+    routes: ["auth", "user", "music", "arts", "payment", "notification", "recommendation", "analytics", "inbox", "ai"],
     frontend: "https://mozartify-nasir.onrender.com",
-    backend: "https:/mozartify-production.up.railway.app/api",
-    backend: "https://mozartify.onrender.com/api",
+    backend_prod: "https://mozartify.onrender.com/api",
   });
 });
-*/
 
 // ================== LOAD ROUTE MODULES (NOT APPS) ==================
 try {
   console.log("🔄 Loading route modules...");
 
   app.use("/api", require("./modules/notification/notification.routes"));
+  console.log("  ✅ /api/notification routes loaded");
+  
   app.use("/api", require("./modules/auth/auth.routes"));
+  console.log("  ✅ /api/auth routes loaded");
+  
   app.use("/api", require("./modules/user/user.routes"));
+  console.log("  ✅ /api/user routes loaded");
+  
   app.use("/api", require("./modules/payment/payment.routes"));
+  console.log("  ✅ /api/payment routes loaded");
+  
   app.use("/api", require("./modules/music/music.routes"));
+  console.log("  ✅ /api/music routes loaded");
+  
   app.use("/api", require("./modules/arts/arts.routes"));
+  console.log("  ✅ /api/arts routes loaded");
+  
   app.use("/api", require("./modules/recommendation/recommendation.routes"));
+  console.log("  ✅ /api/recommendation routes loaded");
+  
   app.use("/api", require("./modules/analytics/analytics.routes"));
+  console.log("  ✅ /api/analytics routes loaded");
+  
   app.use("/api", require("./modules/inbox/inbox.routes"));
+  console.log("  ✅ /api/inbox routes loaded");
+  
   app.use("/api", require("./modules/ai/ai.routes"));
+  console.log("  ✅ /api/ai routes loaded");
 
   console.log("✅ All route modules mounted successfully");
 } catch (error) {
-  console.error("❌ Error loading route modules:", error);
+  console.error("❌ Error loading route modules:", error.message);
+  console.error("Stack:", error.stack);
 }
 
 // ================== DEBUG 404 HANDLER ==================

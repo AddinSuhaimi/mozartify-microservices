@@ -85,7 +85,7 @@ services:
     networks:
       - mozartify-network
     environment:
-      - VITE_API_URL=http://backend:10000
+      - VITE_API_URL=http://localhost:10000
     labels:
       - "com.mozartify.service=frontend"
       - "com.mozartify.phase=1"

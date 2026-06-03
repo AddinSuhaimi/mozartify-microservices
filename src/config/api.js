@@ -1,14 +1,9 @@
 import axios from "axios";
 
-const isProduction = import.meta.env.PROD;
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 export const API_CONFIG = {
-  // BASE_URL: isProduction
-  //   ? "https://mozartify-production.up.railway.app/api"
-  //   : "http://localhost:10000/api",
-  BASE_URL: isProduction
-    ? "https://mozartify.onrender.com/api"
-    : "http://localhost:10000/api",
+  BASE_URL: API_BASE_URL,
   TIMEOUT: 30000,
   DEFAULT_HEADERS: {
     "Content-Type": "application/json",
@@ -19,10 +14,10 @@ axios.defaults.baseURL = API_CONFIG.BASE_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.timeout = API_CONFIG.TIMEOUT;
 
-export const API_BASE_URL = API_CONFIG.BASE_URL;
+export { API_BASE_URL };
 
-console.log("🔗 API Configuration (Cookie-based):", {
-  environment: isProduction ? "production" : "development",
+console.log("🔗 API Configuration:", {
+  environment: import.meta.env.VITE_ENV,
   baseURL: API_CONFIG.BASE_URL,
   withCredentials: axios.defaults.withCredentials,
 });
