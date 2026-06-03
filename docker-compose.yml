@@ -1,0 +1,103 @@
+version: '3.9'
+
+services:
+  # ===== INFRASTRUCTURE =====
+  mongo:
+    image: mongo:7
+    container_name: mozartify-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: mozartify
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mozartify-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mozartify-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mozartify-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== BACKEND MONOLITH =====
+  # Phase 1: Runs all modules from server/modules
+  # Phase 3+: Will be replaced by individual service containers
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mozartify-backend
+    restart: always
+    ports:
+      - "10000:10000"
+    env_file:
+      - ./server/.env.docker
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - ./server/uploads:/app/uploads
+    networks:
+      - mozartify-network
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/mozartify
+      - REDIS_URI=redis://redis:6379
+      - PYTHONUNBUFFERED=1
+    labels:
+      - "com.mozartify.service=backend-monolith"
+      - "com.mozartify.phase=1"
+      - "com.mozartify.note=Will be split into microservices in Phase 3"
+
+  # ===== FASTAPI AI SERVICES =====
+  # Already separate, can scale independently
+  # ai-service:
+  #   build:
+  #     context: ./fastapi-server
+  #     dockerfile: Dockerfile
+  #   container_name: mozartify-ai
+  #   restart: always
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./fastapi-server:/app
+  #     - ./fastapi-server/model:/app/model
+  #   networks:
+  #     - mozartify-network
+  #   environment:
+  #     - FLASK_ENV=development
+  #     - PYTHONUNBUFFERED=1
+  #   labels:
+  #     - "com.mozartify.service=ai-orchestration"
+  #     - "com.mozartify.phase=1"
+
+networks:
+  mozartify-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
+  redis_data:
+    driver: local

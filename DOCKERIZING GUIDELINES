@@ -1,0 +1,329 @@
+Begin with the backend only.
+
+Do not try to containerize everything at once yet.
+
+Your safest path is:
+
+```text
+Step 1 → Backend container
+Step 2 → MongoDB container
+Step 3 → docker-compose
+Step 4 → Verify backend works
+Step 5 → Frontend container
+Step 6 → AI container later
+```
+
+Given your current structure, here is the EXACT starting point.
+
+---
+
+# STEP 1 — Create Backend Dockerfile
+
+Inside:
+
+```text
+server/Dockerfile
+```
+
+Create this:
+
+```dockerfile
+FROM node:20
+
+# Install Python for xml2abc support
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 5000
+
+CMD ["node", "mainserver.js"]
+```
+
+Why this works for YOUR project:
+
+* Node.js backend
+* Python dependency for `xml2abc.py`
+* installs all npm packages
+* runs your existing entrypoint
+
+---
+
+# STEP 2 — Create .dockerignore
+
+Inside:
+
+```text
+server/.dockerignore
+```
+
+Add:
+
+```text
+node_modules
+npm-debug.log
+.env
+.git
+uploads
+```
+
+VERY important:
+do NOT copy local node_modules into container.
+
+---
+
+# STEP 3 — Fix Environment Variables
+
+Your current `.env` probably contains:
+
+```env
+MONGO_URI=mongodb://localhost:27017/...
+```
+
+This WILL break inside Docker.
+
+Replace with:
+
+```env
+MONGO_URI=mongodb://mongo:27017/mozartify
+```
+
+Why?
+Because Docker containers communicate using service names.
+
+---
+
+# STEP 4 — Create docker-compose.yml
+
+At ROOT project level:
+
+```text
+mozartify/
+docker-compose.yml
+```
+
+Create:
+
+```yaml
+version: '3.9'
+
+services:
+  backend:
+    build: ./server
+    container_name: mozartify-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mongo
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  mongo:
+    image: mongo:7
+    container_name: mozartify-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+```
+
+This is your FIRST WORKING container architecture.
+
+Do NOT add frontend yet.
+
+Keep scope small first.
+
+---
+
+# STEP 5 — Verify Backend Entry Point
+
+Your Dockerfile runs:
+
+```dockerfile
+CMD ["node", "mainserver.js"]
+```
+
+Verify:
+
+* `mainserver.js` is truly your backend entrypoint
+* not frontend
+* not combined startup
+
+This is important.
+
+---
+
+# STEP 6 — Run Docker Compose
+
+At project root:
+
+```bash
+docker compose up --build
+```
+
+Expected behavior:
+
+* backend image builds
+* MongoDB container starts
+* backend connects to MongoDB
+* Express server starts
+
+---
+
+# STEP 7 — TEST ONLY API FIRST
+
+Do NOT involve frontend yet.
+
+Test:
+
+* auth routes
+* DB connectivity
+* upload endpoints
+* Stripe init
+* Firebase init
+* AI orchestration
+
+This isolates backend problems first.
+
+---
+
+# MOST LIKELY ERRORS YOU WILL HIT
+
+## ERROR 1 — localhost references
+
+Inside containers:
+
+```text
+localhost = container itself
+```
+
+So:
+
+```js
+http://localhost:8000
+```
+
+inside backend container
+does NOT mean host machine.
+
+You will eventually replace with:
+
+```text
+http://ai-service:8000
+```
+
+later.
+
+---
+
+## ERROR 2 — Python execution path
+
+Your backend likely uses:
+
+```js
+python xml2abc.py
+```
+
+This may fail inside Linux container.
+
+Use:
+
+```js
+python3
+```
+
+instead.
+
+This is VERY common.
+
+---
+
+## ERROR 3 — Windows path separators
+
+If you hardcoded:
+
+```js
+uploads\\temp\\file
+```
+
+Docker Linux container will break.
+
+Use:
+
+```js
+path.join(...)
+```
+
+everywhere.
+
+---
+
+## ERROR 4 — Firebase JSON location
+
+You likely use:
+
+```js
+./config/firebase-service-account.json
+```
+
+Verify paths carefully because Docker changes working directory assumptions.
+
+---
+
+# IMPORTANT
+
+## Do NOT use nodemon inside production Dockerfile yet
+
+First:
+make it boot successfully.
+
+Optimization later.
+
+---
+
+# AFTER BACKEND SUCCESSFULLY RUNS
+
+THEN:
+containerize frontend.
+
+Do NOT parallelize complexity yet.
+
+---
+
+# Your Immediate Goal
+
+You are NOT trying to:
+
+* optimize,
+* scale,
+* orchestrate,
+* or microservice yet.
+
+Your ONLY goal is:
+
+```text
+One-command reproducible deployment
+```
+
+If this works:
+
+```bash
+docker compose up --build
+```
+
+and another developer can run Mozartify identically,
+you have successfully completed Phase 1.
