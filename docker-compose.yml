@@ -70,6 +70,26 @@ services:
       - "com.mozartify.phase=1"
       - "com.mozartify.note=Will be split into microservices in Phase 3"
 
+  # ===== FRONTEND =====
+  # Vite React application served via Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mozartify-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - mozartify-network
+    environment:
+      - VITE_API_URL=http://backend:10000
+    labels:
+      - "com.mozartify.service=frontend"
+      - "com.mozartify.phase=1"
+
   # ===== FASTAPI AI SERVICES =====
   # Already separate, can scale independently
   # ai-service:
