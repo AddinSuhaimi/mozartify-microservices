@@ -31,3 +31,6 @@ dist-ssr
 *.sw?
 
 .venv/
+
+# Firebase Admin SDK credentials
+server/config/firebase-service-account.json
