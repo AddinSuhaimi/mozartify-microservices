@@ -3,11 +3,9 @@ version: '3.9'
 services:
   # ===== INFRASTRUCTURE =====
   mongo:
-    image: mongo:7
+    image: mongo:4.4
     container_name: mozartify-mongo
     restart: always
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: mozartify
     volumes:
@@ -15,17 +13,16 @@ services:
     networks:
       - mozartify-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping').ok", "localhost:27017/mozartify"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 20s
 
   redis:
     image: redis:7-alpine
     container_name: mozartify-redis
     restart: always
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -76,6 +73,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     container_name: mozartify-frontend
     restart: always
     ports:
@@ -84,8 +83,6 @@ services:
       - backend
     networks:
       - mozartify-network
-    environment:
-      - VITE_API_URL=http://localhost:10000
     labels:
       - "com.mozartify.service=frontend"
       - "com.mozartify.phase=1"
