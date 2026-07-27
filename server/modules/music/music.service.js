@@ -260,6 +260,11 @@ const buildFallbackAbcContent = (filename) => {
   return `X:1\nT:${title}\nM:4/4\nL:1/4\nQ:1/4=120\nK:C\nV:1\n"${title}" z4\n`;
 };
 
+const isAudiverisInput = (filename) => {
+  const ext = path.extname(filename || "").toLowerCase();
+  return [".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".pdf"].includes(ext);
+};
+
 exports.processMusicUpload = async (file) => {
   const inputFilePath = path.join(
     __dirname,
@@ -311,6 +316,7 @@ exports.processMusicUpload = async (file) => {
 
   let data = null;
   let usedFallback = false;
+  let audiverisErrorMessage = "";
 
   const audiverisServiceUrl = process.env.AUDIVERIS_SERVICE_URL || "http://audiveris-service:8080/convert";
   const inputFileExists = fs.existsSync(inputFilePath);
@@ -339,6 +345,7 @@ exports.processMusicUpload = async (file) => {
         throw new Error(response?.data?.error || "Audiveris service returned no ABC content");
       }
     } catch (error) {
+      audiverisErrorMessage = error.message;
       console.warn("Audiveris service call failed, using fallback ABC content:", error.message);
     }
   } else {
@@ -364,6 +371,12 @@ exports.processMusicUpload = async (file) => {
   }
 
   if (!data) {
+    if (isAudiverisInput(file.filename)) {
+      throw new Error(
+        `Music score OCR conversion failed for ${file.filename}. ${audiverisErrorMessage || "Audiveris service did not produce ABC output."}`
+      );
+    }
+
     data = buildFallbackAbcContent(file.filename);
     usedFallback = true;
     await fs.promises.writeFile(abcFilePath, data, "utf8");

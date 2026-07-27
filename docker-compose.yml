@@ -107,6 +107,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=8080
+      - AUDIVERIS_COMMAND=audiveris
+      - AUDIVERIS_TIMEOUT_MS=180000
     labels:
       - "com.mozartify.service=audiveris"
       - "com.mozartify.phase=2"

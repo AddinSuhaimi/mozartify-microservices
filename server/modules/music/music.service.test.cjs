@@ -11,25 +11,15 @@ ABCFileModel.prototype.save = async function save() {
   return this;
 };
 
-test('processMusicUpload creates a fallback ABC file when OCR tooling is unavailable', async () => {
+test('processMusicUpload surfaces an OCR conversion error for score images when tooling is unavailable', async () => {
   const uploadName = `test-upload-${Date.now()}.pdf`;
   const fakeFile = { filename: uploadName };
 
-  const result = await musicService.processMusicUpload(fakeFile);
-
-  assert.ok(result.abcFilePath, 'expected an abc file path in the response');
-
-  const expectedAbcPath = path.join(
-    __dirname,
-    '../../uploads',
-    path.parse(uploadName).name,
-    `${path.parse(uploadName).name}.abc`
+  await assert.rejects(
+    () => musicService.processMusicUpload(fakeFile),
+    /OCR conversion failed|Audiveris service did not produce ABC output/i,
+    'expected OCR failure to be surfaced instead of silent fallback'
   );
-
-  assert.ok(fs.existsSync(expectedAbcPath), 'expected a fallback ABC file to be written');
-
-  const content = fs.readFileSync(expectedAbcPath, 'utf8');
-  assert.match(content, /T:/, 'expected fallback ABC content to include a title field');
 });
 
 test('processMusicUpload uses the audiveris service response when available', async () => {
