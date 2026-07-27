@@ -62,6 +62,7 @@ services:
       - MONGO_URI=mongodb://mongo:27017/mozartify
       - REDIS_URI=redis://redis:6379
       - PYTHONUNBUFFERED=1
+      - AUDIVERIS_SERVICE_URL=http://audiveris-service:8080/convert
     labels:
       - "com.mozartify.service=backend-monolith"
       - "com.mozartify.phase=1"
@@ -86,6 +87,27 @@ services:
     labels:
       - "com.mozartify.service=frontend"
       - "com.mozartify.phase=1"
+
+  # ===== AUDIVERIS OCR SERVICE =====
+  audiveris-service:
+    build:
+      context: ./audiveris-service
+      dockerfile: Dockerfile
+    container_name: mozartify-audiveris
+    restart: always
+    expose:
+      - "8080"
+    volumes:
+      - ./audiveris-service/uploads:/app/uploads
+      - ./audiveris-service/output:/app/output
+    networks:
+      - mozartify-network
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+    labels:
+      - "com.mozartify.service=audiveris"
+      - "com.mozartify.phase=2"
 
   # ===== FASTAPI AI SERVICES =====
   # Already separate, can scale independently

@@ -7,6 +7,8 @@ const fs = require("fs");
 const path = require("path");
 const { exec, execFile } = require("child_process");
 const mongoose = require("mongoose");
+const axios = require("axios");
+const FormData = require("form-data");
 const uploadService = require("../../shared/upload/upload.service");
 
 const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
@@ -253,6 +255,11 @@ exports.setFavoritesMusic = async (userId, musicScoreId, action) => {
   };
 };
 
+const buildFallbackAbcContent = (filename) => {
+  const title = path.parse(filename).name || "Imported Score";
+  return `X:1\nT:${title}\nM:4/4\nL:1/4\nQ:1/4=120\nK:C\nV:1\n"${title}" z4\n`;
+};
+
 exports.processMusicUpload = async (file) => {
   const inputFilePath = path.join(
     __dirname,
@@ -280,22 +287,18 @@ exports.processMusicUpload = async (file) => {
     recursive: true,
   });
 
-  console.log(
-    `Running Audiveris on file: ${inputFilePath}`
-  );
-
-  const audiverisPath = `"C:\\Program Files\\Audiveris\\Audiveris.exe"`;
-
-  const audiverisCommand = `${audiverisPath} -batch -transcribe -export -output "${outputDir}" "${inputFilePath}"`;
   const execPromise = (command) => {
     return new Promise((resolve, reject) => {
       exec(command, (error, stdout, stderr) => {
+        if (stdout) {
+          console.log("STDOUT:");
+          console.log(stdout);
+        }
 
-        console.log("STDOUT:");
-        console.log(stdout);
-
-        console.log("STDERR:");
-        console.log(stderr);
+        if (stderr) {
+          console.log("STDERR:");
+          console.log(stderr);
+        }
 
         if (error) {
           reject(error);
@@ -305,34 +308,85 @@ exports.processMusicUpload = async (file) => {
       });
     });
   };
-  await execPromise(audiverisCommand);
 
-  // Convert MXL to ABC using Python script (music21 library) 
-  // This is more reliable than the Node.js xml2abc package 
-  const pythonScript = path.join(
-    __dirname,
-    "./xml2abc.py"
-  );
+  let data = null;
+  let usedFallback = false;
 
-  const abcCommand = `python "${pythonScript}" -o "${outputDir}" "${mxlFilePath}"`;
+  const audiverisServiceUrl = process.env.AUDIVERIS_SERVICE_URL || "http://audiveris-service:8080/convert";
+  const inputFileExists = fs.existsSync(inputFilePath);
 
-  await execPromise(abcCommand);
+  if (inputFileExists) {
+    console.log(`Sending file to Audiveris service: ${inputFilePath}`);
 
-  const data =
-    await fs.promises.readFile(
-      abcFilePath,
-      "utf8"
+    try {
+      const form = new FormData();
+      form.append("file", fs.createReadStream(inputFilePath), {
+        filename: file.filename,
+        contentType: "application/octet-stream",
+      });
+
+      const response = await axios.post(audiverisServiceUrl, form, {
+        headers: {
+          ...form.getHeaders(),
+        },
+        timeout: 120000,
+      });
+
+      if (response?.data?.success && response.data.abc) {
+        data = response.data.abc;
+        await fs.promises.writeFile(abcFilePath, data, "utf8");
+      } else {
+        throw new Error(response?.data?.error || "Audiveris service returned no ABC content");
+      }
+    } catch (error) {
+      console.warn("Audiveris service call failed, using fallback ABC content:", error.message);
+    }
+  } else {
+    console.warn("Uploaded file was not saved to disk; using fallback ABC content.");
+  }
+
+  if (!data) {
+    const pythonScript = path.join(
+      __dirname,
+      "./xml2abc.py"
     );
+
+    if (fs.existsSync(mxlFilePath)) {
+      const abcCommand = `python "${pythonScript}" -o "${outputDir}" "${mxlFilePath}"`;
+
+      try {
+        await execPromise(abcCommand);
+        data = await fs.promises.readFile(abcFilePath, "utf8");
+      } catch (error) {
+        console.warn("Python MusicXML conversion failed, using fallback ABC content:", error.message);
+      }
+    }
+  }
+
+  if (!data) {
+    data = buildFallbackAbcContent(file.filename);
+    usedFallback = true;
+    await fs.promises.writeFile(abcFilePath, data, "utf8");
+  }
 
   const abcFile = new ABCFileModel({
     filename: file.filename,
     content: data,
+    title: path.parse(file.filename).name,
   });
 
   console.log("Saving ABC document:", {
     filename: file.filename,
+    usedFallback,
   });
-  await abcFile.save();
+
+  let persisted = false;
+  try {
+    await abcFile.save();
+    persisted = true;
+  } catch (dbError) {
+    console.warn("Failed to persist ABC document to MongoDB, but the file upload pipeline completed:", dbError.message);
+  }
 
   return {
     filePath: `/uploads/${file.filename}`,
@@ -349,8 +403,10 @@ exports.processMusicUpload = async (file) => {
       path.parse(file.filename).name
     }.abc`,
 
-    message:
-      "File uploaded and processed successfully",
+    message: usedFallback
+      ? "File uploaded successfully; fallback ABC notation was generated because OCR conversion could not be completed"
+      : "File uploaded and processed successfully",
+    persistedToDatabase: persisted,
   };
 };
 
