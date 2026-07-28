@@ -244,22 +244,56 @@ const AdminEdit = () => {
     if (abcContent) {
       const lines = abcContent.split("\n");
       const maxLinesPerPage = isMobile ? 15 : 20;
-      const pages = [];
-      for (let i = 0; i < lines.length; i += maxLinesPerPage) {
-        pages.push(lines.slice(i, i + maxLinesPerPage).join("\n"));
+      const isHeaderLine = (line) => /^[A-Za-z]:/.test(line.trim()) || /^%/.test(line.trim());
+
+      let headerEndIndex = 0;
+      while (headerEndIndex < lines.length && isHeaderLine(lines[headerEndIndex])) {
+        headerEndIndex += 1;
       }
+
+      const headerLines = lines.slice(0, headerEndIndex);
+      const bodyLines = lines.slice(headerEndIndex);
+      const headerBlock = headerLines.length > 0 ? `${headerLines.join("\n")}\n` : "";
+
+      const lineStartOffsets = [];
+      let runningOffset = 0;
+      for (const line of lines) {
+        lineStartOffsets.push(runningOffset);
+        runningOffset += line.length + 1;
+      }
+
+      const pages = [];
+      for (let i = 0; i < bodyLines.length; i += maxLinesPerPage) {
+        const bodyChunk = bodyLines.slice(i, i + maxLinesPerPage);
+        const bodyStartLineIndex = headerEndIndex + i;
+        const chunkOffset = lineStartOffsets[bodyStartLineIndex] || 0;
+        const needsSyntheticHeader = i > 0;
+        const renderContent = needsSyntheticHeader
+          ? `${headerBlock}${bodyChunk.join("\n")}`
+          : lines.slice(0, headerEndIndex + bodyChunk.length).join("\n");
+
+        pages.push({
+          renderContent,
+          offset: chunkOffset,
+          syntheticPrefixLength: needsSyntheticHeader ? headerBlock.length : 0,
+        });
+      }
+
+      if (pages.length === 0) {
+        pages.push({ renderContent: abcContent, offset: 0, syntheticPrefixLength: 0 });
+      }
+
       setSplitContent(pages);
+      setPage(1);
     }
   }, [abcContent, isMobile]);
 
   // Render the ABC content for the current page
   useEffect(() => {
     if (splitContent.length > 0) {
-      const currentPageContent = splitContent[page - 1] || "";
-
-      // Calculate the correct offset by counting characters in previous pages
-      const previousPagesContent = splitContent.slice(0, page - 1).join("\n");
-      const offset = previousPagesContent ? previousPagesContent.length + 1 : 0;
+      const currentPage = splitContent[page - 1];
+      if (!currentPage) return;
+      const { renderContent, offset, syntheticPrefixLength } = currentPage;
 
       // Determine responsive options based on viewport size
       const isMobile = window.innerWidth <= 768; // Example breakpoint for mobile
@@ -269,15 +303,17 @@ const AdminEdit = () => {
         scale: isMobile ? 0.8 : 1,
       };
 
-      ABCJS.renderAbc("abc-render-edit", currentPageContent, options, {
+      ABCJS.renderAbc("abc-render-edit", renderContent, options, {
         clickListener: (abcElem) => {
           if (abcElem && textAreaRef.current) {
             const { startChar, endChar } = abcElem;
             const textarea = textAreaRef.current;
 
             // Calculate absolute positions in the full content
-            const absoluteStartChar = startChar + offset;
-            const absoluteEndChar = endChar + offset;
+            const normalizedStart = Math.max(0, startChar - syntheticPrefixLength);
+            const normalizedEnd = Math.max(0, endChar - syntheticPrefixLength);
+            const absoluteStartChar = normalizedStart + offset;
+            const absoluteEndChar = normalizedEnd + offset;
 
             // Set selection in textarea
             textarea.focus();
