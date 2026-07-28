@@ -71,7 +71,8 @@ const buttonStyles = {
 export default function MusicEntryClerkPreview() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileName } = location.state || {};
+  const { fileName, fileIdentifier } = location.state || {};
+  const fileRef = fileIdentifier || fileName;
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "lg"));
@@ -174,14 +175,14 @@ export default function MusicEntryClerkPreview() {
   // Fetch ABC file content
   useEffect(() => {
     const fetchABCFileContent = async () => {
-      if (!fileName) {
+      if (!fileRef) {
         setError("No file name provided");
         return;
       }
 
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/abc-file/${encodeURIComponent(fileName)}`
+          `${API_BASE_URL}/abc-file/${encodeURIComponent(fileRef)}`
         );
         setAbcContent(response.data.content);
         setError(null);
@@ -192,7 +193,7 @@ export default function MusicEntryClerkPreview() {
     };
 
     fetchABCFileContent();
-  }, [fileName]);
+  }, [fileRef]);
 
   // Split ABC content into pages
   useEffect(() => {
@@ -229,11 +230,11 @@ export default function MusicEntryClerkPreview() {
   };
 
   const handleEdit = () => {
-    navigate("/clerk-edit", { state: { fileName } });
+    navigate("/clerk-edit", { state: { fileName, fileIdentifier } });
   };
 
   const handleProceed = () => {
-    navigate("/clerk-catalog", { state: { fileName } });
+    navigate("/clerk-catalog", { state: { fileName, fileIdentifier } });
   };
   return (
     <ThemeProvider theme={theme}>

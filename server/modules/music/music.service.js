@@ -423,6 +423,7 @@ exports.processMusicUpload = async (file) => {
   }
 
   return {
+    abcId: persisted ? String(abcFile._id) : null,
     filePath: `/uploads/${file.filename}`,
 
     mxlFilePath: `/uploads/${
@@ -475,7 +476,7 @@ exports.getABCFileByIdentifier = async (identifier) => {
   if (mongoose.Types.ObjectId.isValid(identifier)) {
     abcFile = await ABCFileModel.findById(identifier);
   } else {
-    abcFile = await ABCFileModel.findOne({ filename: identifier });
+    abcFile = await ABCFileModel.findOne({ filename: identifier }).sort({ _id: -1 });
   }
   console.log("Mongo result:", abcFile);
   if (!abcFile) {
@@ -485,12 +486,17 @@ exports.getABCFileByIdentifier = async (identifier) => {
   return abcFile;
 };
 
-exports.updateABCFileContent = async (filename, content) => {
-  const abcFile = await ABCFileModel.findOneAndUpdate(
-    { filename },
-    { content },
-    { new: true }
-  );
+exports.updateABCFileContent = async (identifier, content) => {
+  let abcFile;
+
+  if (mongoose.Types.ObjectId.isValid(identifier)) {
+    abcFile = await ABCFileModel.findByIdAndUpdate(identifier, { content }, { new: true });
+  } else {
+    const latest = await ABCFileModel.findOne({ filename: identifier }).sort({ _id: -1 });
+    if (latest) {
+      abcFile = await ABCFileModel.findByIdAndUpdate(latest._id, { content }, { new: true });
+    }
+  }
 
   if (!abcFile) {
     throw new Error("File not found");
@@ -500,7 +506,7 @@ exports.updateABCFileContent = async (filename, content) => {
 };
 
 exports.getCatalogByFilename = async (filename) => {
-  const catalogData = await ABCFileModel.findOne({ filename });
+  const catalogData = await ABCFileModel.findOne({ filename }).sort({ _id: -1 });
 
   if (!catalogData) {
     throw new Error("File not found");
@@ -514,11 +520,10 @@ exports.saveCatalogMetadata = async (filename, metadata) => {
     throw new Error("Filename is required");
   }
 
-  const abcFile = await ABCFileModel.findOneAndUpdate(
-    { filename },
-    metadata,
-    { new: true, strict: false }
-  );
+  const latest = await ABCFileModel.findOne({ filename }).sort({ _id: -1 });
+  const abcFile = latest
+    ? await ABCFileModel.findByIdAndUpdate(latest._id, metadata, { new: true, strict: false })
+    : null;
 
   if (!abcFile) {
     throw new Error("File not found");

@@ -215,7 +215,11 @@ export default function MusicEntryClerkUpload() {
         setIsUploading(false);
         if (data.response?.ok && data.data?.filePath) {
           navigate("/clerk-preview", {
-            state: { file: data.data.filePath, fileName: selectedFile.name },
+            state: {
+              file: data.data.filePath,
+              fileName: selectedFile.name,
+              fileIdentifier: data.data?.abcId || null,
+            },
           });
         } else {
           setDialogMessage(

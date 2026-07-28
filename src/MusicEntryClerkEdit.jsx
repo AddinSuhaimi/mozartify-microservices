@@ -91,7 +91,8 @@ const buttonStyles = {
 const MusicEntryClerkEdit = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileName } = location.state || {};
+  const { fileName, fileIdentifier } = location.state || {};
+  const fileRef = fileIdentifier || fileName;
 
   // Media Query Hooks
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
@@ -216,11 +217,11 @@ const MusicEntryClerkEdit = () => {
 
   // Fetch ABC file content
   useEffect(() => {
-    if (fileName) {
+    if (fileRef) {
       const fetchABCFileContent = async () => {
         try {
           const response = await fetch(
-            `${API_BASE_URL}/abc-file/${fileName}`
+            `${API_BASE_URL}/abc-file/${encodeURIComponent(fileRef)}`
           );
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -235,7 +236,7 @@ const MusicEntryClerkEdit = () => {
 
       fetchABCFileContent();
     }
-  }, [fileName]);
+  }, [fileRef]);
 
   // Split content into pages
   useEffect(() => {
@@ -374,7 +375,7 @@ const MusicEntryClerkEdit = () => {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/abc-file/${fileName}/content`,
+        `${API_BASE_URL}/abc-file/${encodeURIComponent(fileRef)}/content`,
         {
           method: "PUT",
           headers: {
@@ -404,7 +405,7 @@ const MusicEntryClerkEdit = () => {
 
   // Proceed handler
   const handleProceed = () => {
-    navigate("/clerk-catalog", { state: { fileName } });
+    navigate("/clerk-catalog", { state: { fileName, fileIdentifier } });
   };
 
   // Dialog close handler
