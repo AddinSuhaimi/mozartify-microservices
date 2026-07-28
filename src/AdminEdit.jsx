@@ -242,51 +242,10 @@ const AdminEdit = () => {
   // Split content into pages
   useEffect(() => {
     if (abcContent) {
-      const lines = abcContent.split("\n");
-      const maxLinesPerPage = isMobile ? 15 : 20;
-      const isHeaderLine = (line) => /^[A-Za-z]:/.test(line.trim()) || /^%/.test(line.trim());
-
-      let headerEndIndex = 0;
-      while (headerEndIndex < lines.length && isHeaderLine(lines[headerEndIndex])) {
-        headerEndIndex += 1;
-      }
-
-      const headerLines = lines.slice(0, headerEndIndex);
-      const bodyLines = lines.slice(headerEndIndex);
-      const headerBlock = headerLines.length > 0 ? `${headerLines.join("\n")}\n` : "";
-
-      const lineStartOffsets = [];
-      let runningOffset = 0;
-      for (const line of lines) {
-        lineStartOffsets.push(runningOffset);
-        runningOffset += line.length + 1;
-      }
-
-      const pages = [];
-      for (let i = 0; i < bodyLines.length; i += maxLinesPerPage) {
-        const bodyChunk = bodyLines.slice(i, i + maxLinesPerPage);
-        const bodyStartLineIndex = headerEndIndex + i;
-        const chunkOffset = lineStartOffsets[bodyStartLineIndex] || 0;
-        const needsSyntheticHeader = i > 0;
-        const renderContent = needsSyntheticHeader
-          ? `${headerBlock}${bodyChunk.join("\n")}`
-          : lines.slice(0, headerEndIndex + bodyChunk.length).join("\n");
-
-        pages.push({
-          renderContent,
-          offset: chunkOffset,
-          syntheticPrefixLength: needsSyntheticHeader ? headerBlock.length : 0,
-        });
-      }
-
-      if (pages.length === 0) {
-        pages.push({ renderContent: abcContent, offset: 0, syntheticPrefixLength: 0 });
-      }
-
-      setSplitContent(pages);
+      setSplitContent([{ renderContent: abcContent, offset: 0, syntheticPrefixLength: 0 }]);
       setPage(1);
     }
-  }, [abcContent, isMobile]);
+  }, [abcContent]);
 
   // Render the ABC content for the current page
   useEffect(() => {
