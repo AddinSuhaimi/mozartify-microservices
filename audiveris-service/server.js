@@ -159,6 +159,19 @@ const buildAbcFromMusicXml = (xmlText, title) => {
   let key = "C";
   const measureTokens = [];
   let collectedNotes = 0;
+  let beatGroupUnits = 2;
+
+  const recalcBeatGroupUnits = () => {
+    const meterParts = meter.split("/").map((value) => Number(value));
+    const meterBeats = meterParts[0] || 4;
+    const meterBeatType = meterParts[1] || 4;
+    beatGroupUnits =
+      meterBeatType === 8 && meterBeats > 3 && meterBeats % 3 === 0
+        ? 3
+        : Math.max(1, 8 / meterBeatType);
+  };
+
+  recalcBeatGroupUnits();
 
   for (const measure of measures) {
     const attrs = measure.attributes || {};
@@ -171,6 +184,7 @@ const buildAbcFromMusicXml = (xmlText, title) => {
       const beatType = attrs.time["beat-type"];
       if (beats && beatType) {
         meter = `${beats}/${beatType}`;
+        recalcBeatGroupUnits();
       }
     }
 
@@ -181,33 +195,66 @@ const buildAbcFromMusicXml = (xmlText, title) => {
     const notes = toArray(measure.note);
     const noteTokens = [];
     let beamBuffer = [];
+    let beamMode = null;
+    let beamUnits = 0;
 
     const flushBeamBuffer = () => {
       if (beamBuffer.length > 0) {
         noteTokens.push(beamBuffer.join(""));
         beamBuffer = [];
+        beamMode = null;
+        beamUnits = 0;
       }
     };
 
-    const pushTokenWithBeam = (token, beamState) => {
+    const pushTokenWithBeam = (token, beamState, autoBeamEligible, durationUnits) => {
       if (beamState === "begin") {
         flushBeamBuffer();
+        beamMode = "explicit";
+        beamUnits = 0;
         beamBuffer.push(token);
         return;
       }
 
       if (beamState === "continue") {
+        if (beamMode !== "explicit") {
+          flushBeamBuffer();
+          beamMode = "explicit";
+          beamUnits = 0;
+        }
         beamBuffer.push(token);
         return;
       }
 
       if (beamState === "end") {
-        if (beamBuffer.length > 0) {
+        if (beamBuffer.length > 0 && beamMode === "explicit") {
           beamBuffer.push(token);
           flushBeamBuffer();
         } else {
+          flushBeamBuffer();
           noteTokens.push(token);
         }
+        return;
+      }
+
+      if (beamMode === "explicit") {
+        flushBeamBuffer();
+      }
+
+      if (autoBeamEligible) {
+        if (beamMode !== "auto") {
+          flushBeamBuffer();
+          beamMode = "auto";
+          beamUnits = 0;
+        }
+
+        if (beamBuffer.length > 0 && beamUnits + durationUnits > beatGroupUnits) {
+          flushBeamBuffer();
+          beamMode = "auto";
+        }
+
+        beamBuffer.push(token);
+        beamUnits += durationUnits;
         return;
       }
 
@@ -219,9 +266,11 @@ const buildAbcFromMusicXml = (xmlText, title) => {
       const duration = Number(note.duration || 0);
       const length = formatAbcLength(duration * 2, divisions);
       const beamState = getPrimaryBeamState(note);
+      const durationUnits = duration > 0 ? (duration * 2) / divisions : 0;
+      const autoBeamEligible = durationUnits > 0 && durationUnits <= 1;
 
       if (note.rest !== undefined) {
-        pushTokenWithBeam(`z${length}`, beamState);
+        pushTokenWithBeam(`z${length}`, beamState, false, durationUnits);
         continue;
       }
 
@@ -235,7 +284,7 @@ const buildAbcFromMusicXml = (xmlText, title) => {
         continue;
       }
 
-      pushTokenWithBeam(`${abcPitch}${length}`, beamState);
+      pushTokenWithBeam(`${abcPitch}${length}`, beamState, autoBeamEligible, durationUnits);
       collectedNotes += 1;
     }
 
