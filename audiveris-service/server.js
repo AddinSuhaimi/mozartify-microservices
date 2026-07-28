@@ -14,6 +14,7 @@ const execFileAsync = promisify(execFile);
 
 const AUDIVERIS_COMMAND = process.env.AUDIVERIS_COMMAND || "audiveris";
 const AUDIVERIS_TIMEOUT_MS = Number(process.env.AUDIVERIS_TIMEOUT_MS || 180000);
+const MAX_DIAGNOSTIC_LENGTH = 4000;
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
@@ -184,10 +185,29 @@ const buildAbcFromMusicXml = (xmlText, title) => {
 
 const runAudiverisExport = async (inputPath, outputDir) => {
   const args = ["-batch", "-export", "-output", outputDir, inputPath];
-  await execFileAsync(AUDIVERIS_COMMAND, args, {
+  return execFileAsync(AUDIVERIS_COMMAND, args, {
     timeout: AUDIVERIS_TIMEOUT_MS,
     maxBuffer: 10 * 1024 * 1024,
   });
+};
+
+const normalizeDiagnosticText = (value) => {
+  if (!value) return "";
+  const text = String(value).trim();
+  if (text.length <= MAX_DIAGNOSTIC_LENGTH) return text;
+  return `${text.slice(0, MAX_DIAGNOSTIC_LENGTH)}... [truncated]`;
+};
+
+const buildProcessDiagnostics = (error) => {
+  if (!error) return null;
+
+  return {
+    code: error.code || null,
+    signal: error.signal || null,
+    cmd: error.cmd || null,
+    stdout: normalizeDiagnosticText(error.stdout),
+    stderr: normalizeDiagnosticText(error.stderr),
+  };
 };
 
 const walkFiles = (dir) => {
@@ -276,11 +296,15 @@ app.post("/convert", upload.single("file"), async (req, res) => {
   const started = Date.now();
 
   try {
-    await runAudiverisExport(inputPath, outputDir);
+    const exportResult = await runAudiverisExport(inputPath, outputDir);
 
     const artifactPath = findMusicXmlArtifact(outputDir);
     if (!artifactPath) {
-      throw new Error("Audiveris export completed but no MusicXML artifact was produced");
+      const artifactError = new Error("Audiveris export completed but no MusicXML artifact was produced");
+      artifactError.code = "NO_MUSICXML_ARTIFACT";
+      artifactError.stdout = exportResult?.stdout || "";
+      artifactError.stderr = exportResult?.stderr || "";
+      throw artifactError;
     }
 
     const musicXmlText = extractMusicXmlText(artifactPath);
@@ -299,11 +323,24 @@ app.post("/convert", upload.single("file"), async (req, res) => {
       musicXmlArtifact: relativeArtifactPath.split(path.sep).join("/"),
     });
   } catch (error) {
-    console.error("Audiveris service error:", error);
-    res.status(500).json({
+    const diagnostics = buildProcessDiagnostics(error);
+    const isNoArtifact = error.code === "NO_MUSICXML_ARTIFACT";
+    const userMessage = isNoArtifact
+      ? "OCR completed, but no readable music score was detected in this upload."
+      : "OCR conversion failed while processing this upload.";
+
+    console.error("Audiveris service error:", {
+      message: error.message,
+      diagnostics,
+    });
+
+    res.status(422).json({
       success: false,
       error: error.message,
-      hint: "Ensure Audiveris is installed and available in AUDIVERIS_COMMAND, and that exported MusicXML is valid.",
+      userMessage,
+      code: error.code || "AUDIVERIS_CONVERSION_FAILED",
+      diagnostics,
+      hint: "Use a clear, high-contrast score image (300-600 DPI), crop to staves, and ensure the page is upright.",
     });
   }
 });

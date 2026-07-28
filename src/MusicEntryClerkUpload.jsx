@@ -207,15 +207,21 @@ export default function MusicEntryClerkUpload() {
       method: "POST",
       body: formData,
     })
-      .then((response) => response.json())
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        return { response, data };
+      })
       .then((data) => {
         setIsUploading(false);
-        if (data.filePath) {
+        if (data.response?.ok && data.data?.filePath) {
           navigate("/clerk-preview", {
-            state: { file: data.filePath, fileName: selectedFile.name },
+            state: { file: data.data.filePath, fileName: selectedFile.name },
           });
         } else {
-          setDialogMessage("Error uploading file. Please try again.");
+          setDialogMessage(
+            data.data?.message ||
+              "OCR could not detect a readable music score. Please upload a clearer score image/PDF."
+          );
           setDialogOpen(true);
         }
       })

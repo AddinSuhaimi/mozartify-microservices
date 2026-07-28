@@ -185,7 +185,12 @@ exports.uploadMusicFile = async (req, res) => {
       "Error uploading music file:",
       error
     );
-    res.status(500).json({message: error.message});
+    const statusCode = Number.isInteger(error.statusCode) ? error.statusCode : 500;
+    res.status(statusCode).json({
+      message: error.message,
+      code: error.code || "UPLOAD_FAILED",
+      details: error.details || null,
+    });
   }
 };
 

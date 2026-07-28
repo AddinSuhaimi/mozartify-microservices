@@ -317,6 +317,7 @@ exports.processMusicUpload = async (file) => {
   let data = null;
   let usedFallback = false;
   let audiverisErrorMessage = "";
+  let audiverisFailure = null;
 
   const audiverisServiceUrl = process.env.AUDIVERIS_SERVICE_URL || "http://audiveris-service:8080/convert";
   const inputFileExists = fs.existsSync(inputFilePath);
@@ -345,8 +346,24 @@ exports.processMusicUpload = async (file) => {
         throw new Error(response?.data?.error || "Audiveris service returned no ABC content");
       }
     } catch (error) {
-      audiverisErrorMessage = error.message;
-      console.warn("Audiveris service call failed, using fallback ABC content:", error.message);
+      const serviceData = error.response?.data;
+      const serviceDiagnostics = serviceData?.diagnostics || null;
+      const serviceUserMessage = serviceData?.userMessage;
+      const serviceError = serviceData?.error;
+      const combinedErrorMessage = serviceUserMessage || serviceError || error.message;
+
+      audiverisFailure = {
+        code: serviceData?.code || "AUDIVERIS_REQUEST_FAILED",
+        message: combinedErrorMessage,
+        diagnostics: serviceDiagnostics,
+      };
+      audiverisErrorMessage = combinedErrorMessage;
+
+      console.warn("Audiveris service call failed, using fallback ABC content:", {
+        message: combinedErrorMessage,
+        code: audiverisFailure.code,
+        diagnostics: serviceDiagnostics,
+      });
     }
   } else {
     console.warn("Uploaded file was not saved to disk; using fallback ABC content.");
@@ -372,9 +389,13 @@ exports.processMusicUpload = async (file) => {
 
   if (!data) {
     if (isAudiverisInput(file.filename)) {
-      throw new Error(
-        `Music score OCR conversion failed for ${file.filename}. ${audiverisErrorMessage || "Audiveris service did not produce ABC output."}`
+      const ocrError = new Error(
+        `Music score OCR could not detect a readable score in ${file.filename}. ${audiverisErrorMessage || "Audiveris service did not produce ABC output."}`
       );
+      ocrError.statusCode = 422;
+      ocrError.code = audiverisFailure?.code || "OCR_CONVERSION_FAILED";
+      ocrError.details = audiverisFailure?.diagnostics || null;
+      throw ocrError;
     }
 
     data = buildFallbackAbcContent(file.filename);
