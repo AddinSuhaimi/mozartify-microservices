@@ -582,10 +582,25 @@ export default function CustomerCatalog() {
         error
       );
 
-      // Handle different types of errors with dialog
+      const errorStatus = error.response?.status;
+      const errorDetail = String(
+        error.response?.data?.detail || error.response?.statusText || ""
+      ).toLowerCase();
+      const requestUrl = String(error.config?.url || "").toLowerCase();
+      const isAiPredictionRequest =
+        requestUrl.includes("predictemotion") ||
+        requestUrl.includes("predictgender") ||
+        requestUrl.includes("predictgenre");
+      const isInternalServerError =
+        errorStatus === 500 ||
+        errorDetail.includes("internal server error");
+
       let errorMessage = "An unexpected error occurred.";
 
-      if (error.response) {
+      // Show a user-friendly notice when AI model services are not ready.
+      if (isAiPredictionRequest && isInternalServerError) {
+        errorMessage = "AI models are currently in development. Please try again later.";
+      } else if (error.response) {
         errorMessage = `Backend error: ${error.response.data.detail || error.response.statusText}`;
       } else if (error.request) {
         errorMessage =
