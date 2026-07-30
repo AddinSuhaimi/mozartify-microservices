@@ -34,16 +34,6 @@ const buttonStyles = {
   },
 };
 
-const artsButtonStyles = {
-  ...buttonStyles,
-  backgroundColor: "#FFB6C1", // Soft pink color
-  border: "1px solid #FFB6C1",
-  "&:hover": {
-    backgroundColor: "#FFA0B3", // Slightly darker pink for hover
-    borderColor: "#FFA0B3",
-  },
-};
-
 const FormContainer = styled(Box)(({ theme }) => ({
   backgroundColor: "#FFFFFF",
   borderRadius: "20px",
@@ -319,10 +309,6 @@ export default function Login() {
     handleLogin(e, "music");
   };
 
-  const handleArtsLogin = (e) => {
-    handleLogin(e, "arts");
-  };
-
   return (
     <>
       <style>
@@ -460,19 +446,6 @@ export default function Login() {
             }}
           >
             Music Login
-          </Button>
-
-          <Button
-            variant="outlined"
-            size={isMobile ? "medium" : "large"}
-            onClick={handleArtsLogin}
-            sx={{
-              mt: { xs: 2, sm: 3 },
-              ...artsButtonStyles, // Using the pink styles here
-              width: { xs: "100%", sm: "auto" },
-            }}
-          >
-            ARTS Login
           </Button>
 
           <Typography

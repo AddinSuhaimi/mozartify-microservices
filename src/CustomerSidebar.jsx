@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
@@ -20,7 +20,6 @@ import {
   ExitToApp,
   Search,
   EditNote,
-  ChangeCircle,
 } from "@mui/icons-material";
 import SidebarMozartifyLogo from "./assets/mozartify.png";
 import { useUnread } from "./UnreadContext.jsx";
@@ -146,12 +145,6 @@ const CustomerSidebar = ({ active }) => {
   ];
 
   const bottomNavigationItems = [
-    {
-      path: "/customer-homepage-2",
-      label: "Art InstaLogin",
-      icon: <ChangeCircle />,
-      key: "art",
-    },
     {
       path: "/customer-profile",
       label: "User Profile",
