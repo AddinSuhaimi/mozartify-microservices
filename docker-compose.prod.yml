@@ -4,4 +4,4 @@ services:
   frontend:
     build:
       args:
-        VITE_API_URL: /api
+        VITE_API_URL: https://www.mozartify.my
