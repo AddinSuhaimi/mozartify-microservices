@@ -471,48 +471,101 @@ exports.getABCFiles = async (sortOrder = "desc", sortBy = "_id") => {
 };
 
 exports.getABCFileByIdentifier = async (identifier) => {
-  let abcFile;
-  console.log("Requested identifier:", identifier);
-  if (mongoose.Types.ObjectId.isValid(identifier)) {
-    abcFile = await ABCFileModel.findById(identifier);
-  } else {
-    abcFile = await ABCFileModel.findOne({ filename: identifier }).sort({ _id: -1 });
-  }
-  console.log("Mongo result:", abcFile);
-  if (!abcFile) {
-    throw new Error("File not found");
-  }
+  const rawIdentifier = typeof identifier === "string" ? identifier : "";
+  const candidateValues = [rawIdentifier, rawIdentifier.trim()];
 
-  return abcFile;
-};
-
-exports.updateABCFileContent = async (identifier, content) => {
-  let abcFile;
-
-  if (mongoose.Types.ObjectId.isValid(identifier)) {
-    abcFile = await ABCFileModel.findByIdAndUpdate(identifier, { content }, { new: true });
-  } else {
-    const latest = await ABCFileModel.findOne({ filename: identifier }).sort({ _id: -1 });
-    if (latest) {
-      abcFile = await ABCFileModel.findByIdAndUpdate(latest._id, { content }, { new: true });
+  for (const candidate of [...candidateValues]) {
+    if (!candidate) continue;
+    candidateValues.push(candidate.replace(/\+/g, " "));
+    try {
+      candidateValues.push(decodeURIComponent(candidate));
+    } catch (error) {
+      // Ignore malformed URL encoding and keep the raw value.
     }
   }
 
-  if (!abcFile) {
-    throw new Error("File not found");
+  const uniqueCandidates = [...new Set(candidateValues.filter(Boolean))];
+
+  let abcFile = null;
+  console.log("Requested identifier:", identifier);
+
+  for (const candidate of uniqueCandidates) {
+    if (mongoose.Types.ObjectId.isValid(candidate)) {
+      abcFile = await ABCFileModel.findById(candidate);
+    } else {
+      abcFile = await ABCFileModel.findOne({ filename: candidate }).sort({ _id: -1 });
+    }
+
+    if (abcFile) {
+      console.log("Mongo result:", abcFile);
+      return abcFile;
+    }
   }
 
-  return abcFile;
+  console.log("Mongo result: null");
+  throw new Error("File not found");
+};
+
+exports.updateABCFileContent = async (identifier, content) => {
+  const rawIdentifier = typeof identifier === "string" ? identifier : "";
+  const candidateValues = [rawIdentifier, rawIdentifier.trim()];
+
+  for (const candidate of [...candidateValues]) {
+    if (!candidate) continue;
+    candidateValues.push(candidate.replace(/\+/g, " "));
+    try {
+      candidateValues.push(decodeURIComponent(candidate));
+    } catch (error) {
+      // Ignore malformed URL encoding and keep the raw value.
+    }
+  }
+
+  const uniqueCandidates = [...new Set(candidateValues.filter(Boolean))];
+
+  let abcFile = null;
+
+  for (const candidate of uniqueCandidates) {
+    if (mongoose.Types.ObjectId.isValid(candidate)) {
+      abcFile = await ABCFileModel.findByIdAndUpdate(candidate, { content }, { new: true });
+    } else {
+      const latest = await ABCFileModel.findOne({ filename: candidate }).sort({ _id: -1 });
+      if (latest) {
+        abcFile = await ABCFileModel.findByIdAndUpdate(latest._id, { content }, { new: true });
+      }
+    }
+
+    if (abcFile) {
+      return abcFile;
+    }
+  }
+
+  throw new Error("File not found");
 };
 
 exports.getCatalogByFilename = async (filename) => {
-  const catalogData = await ABCFileModel.findOne({ filename }).sort({ _id: -1 });
+  const rawFilename = typeof filename === "string" ? filename : "";
+  const candidateValues = [rawFilename, rawFilename.trim()];
 
-  if (!catalogData) {
-    throw new Error("File not found");
+  for (const candidate of [...candidateValues]) {
+    if (!candidate) continue;
+    candidateValues.push(candidate.replace(/\+/g, " "));
+    try {
+      candidateValues.push(decodeURIComponent(candidate));
+    } catch (error) {
+      // Ignore malformed URL encoding and keep the raw value.
+    }
   }
 
-  return catalogData;
+  const uniqueCandidates = [...new Set(candidateValues.filter(Boolean))];
+
+  for (const candidate of uniqueCandidates) {
+    const catalogData = await ABCFileModel.findOne({ filename: candidate }).sort({ _id: -1 });
+    if (catalogData) {
+      return catalogData;
+    }
+  }
+
+  throw new Error("File not found");
 };
 
 exports.saveCatalogMetadata = async (filename, metadata) => {
