@@ -1,5 +1,6 @@
 import os
 import warnings
+import traceback
 warnings.filterwarnings("ignore")
 
 from fastapi import FastAPI, HTTPException
@@ -19,11 +20,20 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Add both origins
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://0.0.0.0:5173",
+        "http://host.docker.internal",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "emotion"}
 
 
 # Load models once to avoid reloading them on every request
@@ -63,9 +73,15 @@ class FileUrlRequest(BaseModel):
     fileUrl: str
 
 def audioPreprocessing(file_content):
-    audio = AudioSegment.from_file(io.BytesIO(file_content), format="mp3")
-    samples = np.array(audio.get_array_of_samples()).astype(np.float32) / 32768  # Normalize
-    arr = librosa.core.resample(y=samples, orig_sr=audio.frame_rate, target_sr=11025)
+    try:
+        audio = AudioSegment.from_file(io.BytesIO(file_content), format="mp3")
+    except Exception:
+        audio = AudioSegment.from_file(io.BytesIO(file_content))
+
+    audio = audio.set_frame_rate(22050)
+    audio = audio.set_channels(1)
+    samples = np.array(audio.get_array_of_samples()).astype(np.float32) / 32768
+    arr = librosa.resample(y=samples, orig_sr=audio.frame_rate, target_sr=11025)
     return arr
 
 def moodString(f_pred):
@@ -100,6 +116,8 @@ def prediction2d(file_content):
     f_mfcc_reshaped = f_mfcc_resized.reshape((1, 120, 600, 1))
     f_mel_reshaped = f_mel_resized.reshape((1, 300, 400, 1))
 
+    print("Input shapes:", f_spec_reshaped.shape, f_mfcc_reshaped.shape, f_mel_reshaped.shape)
+
     # Predictions from each model
     y_prob1 = model_spec.predict(f_spec_reshaped)
     y_prob2 = model_mfcc.predict(f_mfcc_reshaped)
@@ -127,7 +145,9 @@ print("Reached route registration")
 @app.post("/predict-emotion")
 async def predict_from_url(request: FileUrlRequest):
     try:
-        fileUrl = request.fileUrl
+        fileUrl = request.fileUrl or getattr(request, "file_url", None)
+        if not fileUrl:
+            raise HTTPException(status_code=400, detail="No file URL provided.")
         print("Received file URL for prediction:", fileUrl)
         
         # Download the file from Firebase using the provided URL
@@ -146,10 +166,11 @@ async def predict_from_url(request: FileUrlRequest):
 
     except requests.exceptions.RequestException as e:
         print("Error downloading file from Firebase:", e)
-        raise HTTPException(status_code=500, detail="Error downloading file from Firebase")
+        raise HTTPException(status_code=500, detail=f"Error downloading file from Firebase: {e}")
     except Exception as e:
-        print("Error during prediction:", e)
-        raise HTTPException(status_code=500, detail="Error during prediction")
+        print("Error during prediction:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error during prediction: {type(e).__name__}: {e}")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=8002)

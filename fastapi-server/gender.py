@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,9 +23,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "model", "gender", "gender_classifier.pkl")
+model = joblib.load(model_path)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "gender"}
+
 # Define Pydantic model to parse the incoming request body
 class GenderPredictionRequest(BaseModel):
-    file_url: str
+    fileUrl: Optional[str] = None
+    file_url: Optional[str] = None
+
+    @property
+    def resolved_file_url(self) -> Optional[str]:
+        return self.fileUrl or self.file_url
 
 # Define the response model for gender prediction
 class GenderPredictionResult(BaseModel):
@@ -32,7 +46,9 @@ class GenderPredictionResult(BaseModel):
 
 @app.post("/predict-gender/", response_model=GenderPredictionResult)
 async def predict_gender(request: GenderPredictionRequest, chunk_duration: int = 30, overlap_duration: int = 2):
-    file_url = request.file_url  # Get file_url from the request
+    file_url = request.resolved_file_url
+    if not file_url:
+        raise HTTPException(status_code=400, detail="No file URL provided.")
     print(f"Received file URL: {file_url}")
 
     # Download and process the audio file
@@ -56,23 +72,6 @@ async def predict_gender(request: GenderPredictionRequest, chunk_duration: int =
     except Exception as e:
         print(f"Error downloading or loading audio file: {e}")
         raise HTTPException(status_code=500, detail=f"Error downloading or loading audio file: {e}")
-
-    # Load the gender classifier model
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(
-        BASE_DIR,
-        "model",
-        "gender",
-        "gender_classifier.pkl"
-    )
-    
-    try:
-        print(f"Loading gender classifier model from {model_path}...")
-        model = joblib.load(model_path)
-        print("Model loaded successfully.")
-    except Exception as e:
-        print(f"Error loading the gender classifier model: {e}")
-        raise HTTPException(status_code=500, detail=f"Error loading the gender classifier model: {e}")
 
     # Perform gender prediction
     predictions = []
@@ -108,4 +107,4 @@ async def predict_gender(request: GenderPredictionRequest, chunk_duration: int =
     return {"gender": gender}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8003)
+    uvicorn.run(app, host="0.0.0.0", port=8003)

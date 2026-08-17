@@ -2,31 +2,27 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gcc \
     g++ \
+    ffmpeg \
+    libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
 COPY requirements.txt .
 
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
 COPY . .
 
-# Expose AI service port
-EXPOSE 5000
+ENV PYTHONUNBUFFERED=1 \
+    SERVICE_MODULE=genre \
+    PORT=8001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD python -c "import requests; requests.get('http://localhost:5000/health')" || exit 1
+EXPOSE 8001
 
-# Set Python to run in unbuffered mode
-ENV PYTHONUNBUFFERED=1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+  CMD python -c "import os, requests; requests.get(f\"http://127.0.0.1:{os.environ['PORT']}/health\", timeout=5).raise_for_status()"
 
-# Start FastAPI server
-CMD ["python", "main.py"]
+CMD ["sh", "-c", "uvicorn ${SERVICE_MODULE}:app --host 0.0.0.0 --port ${PORT}"]

@@ -1,3 +1,6 @@
+import os
+from typing import Optional
+
 import numpy as np
 import librosa
 import tensorflow as tf
@@ -6,7 +9,6 @@ from pydantic import BaseModel
 import requests
 from io import BytesIO
 from fastapi.middleware.cors import CORSMiddleware
-import os
 import uvicorn
 
 # Initialize FastAPI app
@@ -15,11 +17,20 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://0.0.0.0:5173",
+        "http://host.docker.internal",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "genre"}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "model", "genre", "Trained_model.h5")
@@ -102,7 +113,8 @@ def model_prediction(X_test: np.ndarray) -> list:
     return top_genre, top_genres
 
 class FileUrlRequest(BaseModel):
-    fileUrl: str
+    fileUrl: Optional[str] = None
+    file_url: Optional[str] = None
 
 class PredictionResponse(BaseModel):
     genre: str
@@ -110,11 +122,12 @@ class PredictionResponse(BaseModel):
 
 @app.post("/predict-genre", response_model=PredictionResponse)
 async def predict_genre(request: FileUrlRequest) -> PredictionResponse:
-    if not request.fileUrl:
+    file_url = request.fileUrl or request.file_url
+    if not file_url:
         raise HTTPException(status_code=400, detail="No file URL provided.")
     
     try:
-        response = requests.get(request.fileUrl)
+        response = requests.get(file_url)
         response.raise_for_status()
         
         audio_file = BytesIO(response.content)
@@ -131,4 +144,4 @@ async def predict_genre(request: FileUrlRequest) -> PredictionResponse:
         raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
     
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

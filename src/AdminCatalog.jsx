@@ -583,9 +583,8 @@ export default function AdminCatalog() {
 
       let errorMessage = "An unexpected error occurred.";
 
-      // Show a user-friendly notice when AI model services are not ready.
       if (isAiPredictionRequest && isInternalServerError) {
-        errorMessage = "AI models are currently in development. Please try again later.";
+        errorMessage = "AI prediction failed. Please verify the audio file and try again.";
       } else if (error.response) {
         errorMessage = `Backend error: ${error.response.data.detail || error.response.statusText}`;
       } else if (error.request) {

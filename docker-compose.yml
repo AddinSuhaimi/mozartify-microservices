@@ -53,6 +53,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      emotion-ai:
+        condition: service_healthy
+      gender-ai:
+        condition: service_healthy
+      genre-ai:
+        condition: service_healthy
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -114,26 +120,44 @@ services:
       - "com.mozartify.phase=2"
 
   # ===== FASTAPI AI SERVICES =====
-  # Already separate, can scale independently
-  # ai-service:
-  #   build:
-  #     context: ./fastapi-server
-  #     dockerfile: Dockerfile
-  #   container_name: mozartify-ai
-  #   restart: always
-  #   ports:
-  #     - "5000:5000"
-  #   volumes:
-  #     - ./fastapi-server:/app
-  #     - ./fastapi-server/model:/app/model
-  #   networks:
-  #     - mozartify-network
-  #   environment:
-  #     - FLASK_ENV=development
-  #     - PYTHONUNBUFFERED=1
-  #   labels:
-  #     - "com.mozartify.service=ai-orchestration"
-  #     - "com.mozartify.phase=1"
+  genre-ai:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "8001"
+    environment:
+      SERVICE_MODULE: genre
+      PORT: 8001
+    networks:
+      - mozartify-network
+
+  emotion-ai:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "8002"
+    environment:
+      SERVICE_MODULE: emotion
+      PORT: 8002
+    networks:
+      - mozartify-network
+
+  gender-ai:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "8003"
+    environment:
+      SERVICE_MODULE: gender
+      PORT: 8003
+    networks:
+      - mozartify-network
 
 networks:
   mozartify-network:
