@@ -10,6 +10,7 @@ services:
     environment:
       SERVICE_MODULE: genre
       PORT: 8001
+      TF_ENABLE_ONEDNN_OPTS: "0"
     platform: linux/amd64
 
   emotion-ai:
@@ -23,6 +24,7 @@ services:
     environment:
       SERVICE_MODULE: emotion
       PORT: 8002
+      TF_ENABLE_ONEDNN_OPTS: "0"
     platform: linux/amd64
 
   gender-ai:
@@ -36,4 +38,5 @@ services:
     environment:
       SERVICE_MODULE: gender
       PORT: 8003
+      TF_ENABLE_ONEDNN_OPTS: "0"
     platform: linux/amd64
