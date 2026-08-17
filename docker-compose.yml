@@ -57,6 +57,8 @@ services:
       - ./server:/app
       - /app/node_modules
       - ./server/uploads:/app/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - mozartify-network
     environment:
@@ -65,7 +67,7 @@ services:
       - REDIS_URI=redis://redis:6379
       - PYTHONUNBUFFERED=1
       - AUDIVERIS_SERVICE_URL=http://audiveris-service:8080/convert
-      - FASTAPI_PROD_URL=http://10.100.12.37
+      - FASTAPI_PROD_URL=http://host.docker.internal
     labels:
       - "com.mozartify.service=backend-monolith"
       - "com.mozartify.phase=1"
@@ -115,26 +117,53 @@ services:
       - "com.mozartify.phase=2"
 
   # ===== FASTAPI AI SERVICES =====
-  # Already separate, can scale independently
-  # ai-service:
-  #   build:
-  #     context: ./fastapi-server
-  #     dockerfile: Dockerfile
-  #   container_name: mozartify-ai
-  #   restart: always
-  #   ports:
-  #     - "5000:5000"
-  #   volumes:
-  #     - ./fastapi-server:/app
-  #     - ./fastapi-server/model:/app/model
-  #   networks:
-  #     - mozartify-network
-  #   environment:
-  #     - FLASK_ENV=development
-  #     - PYTHONUNBUFFERED=1
-  #   labels:
-  #     - "com.mozartify.service=ai-orchestration"
-  #     - "com.mozartify.phase=1"
+  genre-ai:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    container_name: mozartify-genre-ai
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      SERVICE_MODULE: genre
+      PORT: 8001
+      TF_ENABLE_ONEDNN_OPTS: "0"
+    networks:
+      - mozartify-network
+    platform: linux/amd64
+
+  emotion-ai:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    container_name: mozartify-emotion-ai
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      SERVICE_MODULE: emotion
+      PORT: 8002
+      TF_ENABLE_ONEDNN_OPTS: "0"
+    networks:
+      - mozartify-network
+    platform: linux/amd64
+
+  gender-ai:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    container_name: mozartify-gender-ai
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      SERVICE_MODULE: gender
+      PORT: 8003
+      TF_ENABLE_ONEDNN_OPTS: "0"
+    networks:
+      - mozartify-network
+    platform: linux/amd64
 
 networks:
   mozartify-network:
