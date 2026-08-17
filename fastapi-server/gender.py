@@ -23,10 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(BASE_DIR, "model", "gender", "gender_classifier.pkl")
-model = joblib.load(model_path)
-
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "gender"}
@@ -72,6 +68,23 @@ async def predict_gender(request: GenderPredictionRequest, chunk_duration: int =
     except Exception as e:
         print(f"Error downloading or loading audio file: {e}")
         raise HTTPException(status_code=500, detail=f"Error downloading or loading audio file: {e}")
+
+    # Load the gender classifier model
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(
+        BASE_DIR,
+        "model",
+        "gender",
+        "gender_classifier.pkl"
+    )
+    
+    try:
+        print(f"Loading gender classifier model from {model_path}...")
+        model = joblib.load(model_path)
+        print("Model loaded successfully.")
+    except Exception as e:
+        print(f"Error loading the gender classifier model: {e}")
+        raise HTTPException(status_code=500, detail=f"Error loading the gender classifier model: {e}")
 
     # Perform gender prediction
     predictions = []
