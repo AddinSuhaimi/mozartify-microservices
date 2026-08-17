@@ -10,6 +10,7 @@ services:
     environment:
       SERVICE_MODULE: genre
       PORT: 8001
+    platform: linux/amd64
 
   emotion-ai:
     build:
@@ -22,6 +23,7 @@ services:
     environment:
       SERVICE_MODULE: emotion
       PORT: 8002
+    platform: linux/amd64
 
   gender-ai:
     build:
@@ -34,3 +36,4 @@ services:
     environment:
       SERVICE_MODULE: gender
       PORT: 8003
+    platform: linux/amd64

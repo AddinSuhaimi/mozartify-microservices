@@ -60,11 +60,12 @@ services:
     networks:
       - mozartify-network
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - MONGO_URI=mongodb://mongo:27017/mozartify
       - REDIS_URI=redis://redis:6379
       - PYTHONUNBUFFERED=1
       - AUDIVERIS_SERVICE_URL=http://audiveris-service:8080/convert
+      - FASTAPI_PROD_URL=http://10.100.12.37
     labels:
       - "com.mozartify.service=backend-monolith"
       - "com.mozartify.phase=1"

@@ -12,8 +12,10 @@ RUN apt-get update && \
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Optional build-arg: set TF_VARIANT="tensorflow-cpu==2.10.0" when building if you need a CPU-compatible TF wheel.
+ARG TF_VARIANT=""
+RUN pip install --no-cache-dir -r requirements.txt && \
+    if [ -n "$TF_VARIANT" ]; then pip install --no-cache-dir "$TF_VARIANT"; fi
 
 COPY . .
 
