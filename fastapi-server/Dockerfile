@@ -9,12 +9,16 @@ RUN apt-get update && \
     g++ \
     ffmpeg \
     libsndfile1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-COPY tensorflow-2.16.1-cp311-cp311-linux_x86_64.whl /tmp/tensorflow.whl
 
-RUN pip install --no-cache-dir -r requirements.txt && \
+ARG TENSORFLOW_WHEEL_URL="https://github.com/AddinSuhaimi/mozartify-microservices/releases/download/tf_whl_v1/tensorflow-2.16.1-cp311-cp311-linux_x86_64.whl"
+
+RUN curl -fL --retry 3 --retry-delay 5 \
+      -o /tmp/tensorflow.whl "$TENSORFLOW_WHEEL_URL" && \
+    pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir /tmp/tensorflow.whl && \
     rm /tmp/tensorflow.whl
 
