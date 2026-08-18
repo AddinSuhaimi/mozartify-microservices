@@ -67,7 +67,9 @@ services:
       - REDIS_URI=redis://redis:6379
       - PYTHONUNBUFFERED=1
       - AUDIVERIS_SERVICE_URL=http://audiveris-service:8080/convert
-      - FASTAPI_PROD_URL=http://host.docker.internal
+      - FASTAPI_EMOTION_URL=http://emotion-ai:8002/predict-emotion
+      - FASTAPI_GENDER_URL=http://gender-ai:8003/predict-gender
+      - FASTAPI_GENRE_URL=http://genre-ai:8001/predict-genre
     labels:
       - "com.mozartify.service=backend-monolith"
       - "com.mozartify.phase=1"

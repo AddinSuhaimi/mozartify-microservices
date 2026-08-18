@@ -5,10 +5,15 @@ const FASTAPI_BASE_URL = isProduction
   : process.env.FASTAPI_DEV_URL;
 
 const fastApiEndpoints = {
-  emotion: `${FASTAPI_BASE_URL}:8002/predict-emotion`,
-  gender: `${FASTAPI_BASE_URL}:8003/predict-gender`,
-  genre: `${FASTAPI_BASE_URL}:8001/predict-genre`,
-  instrument: `${FASTAPI_BASE_URL}:8000/predict-instrument`,
+  emotion:
+    process.env.FASTAPI_EMOTION_URL ||
+    `${FASTAPI_BASE_URL}:8002/predict-emotion`,
+  gender:
+    process.env.FASTAPI_GENDER_URL ||
+    `${FASTAPI_BASE_URL}:8003/predict-gender`,
+  genre:
+    process.env.FASTAPI_GENRE_URL ||
+    `${FASTAPI_BASE_URL}:8001/predict-genre`,
 };
 
 module.exports = {
