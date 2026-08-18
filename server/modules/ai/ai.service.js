@@ -1,11 +1,14 @@
 const axios = require("axios");
 const { fastApiEndpoints } = require("./ai.constants");
 
+const AI_REQUEST_TIMEOUT = 120000;
+
 // Emotion prediction
 exports.predictEmotion = async (fileUrl) => {
   const response = await axios.post(
     fastApiEndpoints.emotion,
-    { fileUrl }
+    { fileUrl },
+    { timeout: AI_REQUEST_TIMEOUT }
   );
 
   return response.data;
@@ -15,7 +18,8 @@ exports.predictEmotion = async (fileUrl) => {
 exports.predictGender = async (fileUrl) => {
   const response = await axios.post(
     fastApiEndpoints.gender,
-    { fileUrl }
+    { fileUrl },
+    { timeout: AI_REQUEST_TIMEOUT }
   );
 
   return {
@@ -27,7 +31,8 @@ exports.predictGender = async (fileUrl) => {
 exports.predictGenre = async (fileUrl) => {
   const response = await axios.post(
     fastApiEndpoints.genre,
-    { fileUrl }
+    { fileUrl },
+    { timeout: AI_REQUEST_TIMEOUT }
   );
 
   return {
