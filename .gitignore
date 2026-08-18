@@ -32,5 +32,8 @@ dist-ssr
 
 .venv/
 
+# Local TensorFlow wheel is too large for GitHub's regular file limit.
+fastapi-server/tensorflow-2.16.1-cp311-cp311-linux_x86_64.whl
+
 # Firebase Admin SDK credentials
 server/config/firebase-service-account.json

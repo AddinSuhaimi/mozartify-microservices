@@ -2,6 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Install native libraries required by the audio processing dependencies.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gcc \
@@ -11,11 +12,11 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+COPY tensorflow-2.16.1-cp311-cp311-linux_x86_64.whl /tmp/tensorflow.whl
 
-# Optional build-arg: set TF_VARIANT="tensorflow-cpu==2.10.0" when building if you need a CPU-compatible TF wheel.
-ARG TF_VARIANT=""
 RUN pip install --no-cache-dir -r requirements.txt && \
-    if [ -n "$TF_VARIANT" ]; then pip install --no-cache-dir "$TF_VARIANT"; fi
+    pip install --no-cache-dir /tmp/tensorflow.whl && \
+    rm /tmp/tensorflow.whl
 
 COPY . .
 

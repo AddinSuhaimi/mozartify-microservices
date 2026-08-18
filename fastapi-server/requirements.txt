@@ -1,12 +1,12 @@
 fastapi
 uvicorn[standard]
-numpy
+numpy<2.0
 scipy
 librosa
 soundfile
 python-multipart
 pillow
+pydub
 requests
 onnxruntime
 scikit-learn
-tensorflow==2.15.1
