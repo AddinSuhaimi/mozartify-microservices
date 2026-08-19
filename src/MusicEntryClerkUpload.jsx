@@ -372,6 +372,7 @@ export default function MusicEntryClerkUpload() {
                   mb: 1.5,
                   p: 1.5,
                   width: "100%",
+                  boxSizing: "border-box",
                   textAlign: "left",
                   backgroundColor: "#F5FAFC",
                   border: "1px solid #D6EEF5",
@@ -435,6 +436,7 @@ export default function MusicEntryClerkUpload() {
                       backgroundColor: "#FFFFFF",
                       border: "1px solid #8BD3E6",
                       borderRadius: 1,
+                      boxSizing: "border-box",
                     }}
                   >
                     <InsertDriveFileIcon sx={{ color: "#8BD3E6" }} />
