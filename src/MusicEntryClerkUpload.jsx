@@ -19,7 +19,7 @@ import {
   Drawer,
   Divider,
 } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
+import { Menu as MenuIcon, InsertDriveFile as InsertDriveFileIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { createGlobalStyle } from "styled-components";
@@ -363,6 +363,37 @@ export default function MusicEntryClerkUpload() {
                 Import from computer
               </Typography>
 
+              <Box
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  p: 2,
+                  width: "100%",
+                  textAlign: "left",
+                  backgroundColor: "#F5FAFC",
+                  border: "1px solid #D6EEF5",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontFamily: "Montserrat", fontWeight: "bold", mb: 0.5 }}
+                >
+                  File requirements
+                </Typography>
+                <Typography
+                  component="ul"
+                  variant="body2"
+                  sx={{ fontFamily: "Montserrat", pl: 2.5, m: 0, color: "#555" }}
+                >
+                  <li>Accepted formats: JPG, JPEG, PNG, or PDF</li>
+                  <li>Use a clear, high-contrast scan (not a screenshot or low-res photo)</li>
+                  <li>Minimum resolution: ~1500px on the longest side (ideally 300 DPI)</li>
+                  <li>Upright page, cropped close to the staves, single staff/part per score</li>
+                  <li>Maximum file size: 10MB</li>
+                </Typography>
+              </Box>
+
               <input
                 type="file"
                 accept=".jpg,.jpeg,.png,.pdf"
@@ -376,7 +407,7 @@ export default function MusicEntryClerkUpload() {
                   variant="contained"
                   component="span"
                   fullWidth
-                  sx={{ mt: 3, ...buttonStyles }}
+                  sx={{ mt: 1, ...buttonStyles }}
                 >
                   Choose File
                 </Button>
@@ -384,6 +415,33 @@ export default function MusicEntryClerkUpload() {
 
               {selectedFile && (
                 <>
+                  <Box
+                    sx={{
+                      mt: 2,
+                      p: 1.5,
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #8BD3E6",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <InsertDriveFileIcon sx={{ color: "#8BD3E6" }} />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Montserrat",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={selectedFile.name}
+                    >
+                      {selectedFile.name}
+                    </Typography>
+                  </Box>
                   <Button
                     variant="outlined"
                     fullWidth

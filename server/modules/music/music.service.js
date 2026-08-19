@@ -9,7 +9,12 @@ const { exec, execFile } = require("child_process");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const FormData = require("form-data");
+const sizeOf = require("image-size");
 const uploadService = require("../../shared/upload/upload.service");
+
+// Audiveris needs a reasonably high-resolution scan (~300 DPI) to detect staff lines reliably.
+const MIN_SCORE_IMAGE_LONG_EDGE_PX = 1500;
+const RASTER_EXTENSIONS = [".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"];
 
 const buildMusicQuery = (combinedQueries, selectedCollection, queryText, filters) => {
   let conditions = [];
@@ -262,7 +267,37 @@ const buildFallbackAbcContent = (filename) => {
 
 const isAudiverisInput = (filename) => {
   const ext = path.extname(filename || "").toLowerCase();
-  return [".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".pdf"].includes(ext);
+  return [...RASTER_EXTENSIONS, ".pdf"].includes(ext);
+};
+
+// Screenshots/low-res photos have too few pixels per staff line for Audiveris to detect them
+// (it logs e.g. "too low interline value ... picture resolution is too low") and silently
+// produce zero output instead of a hard error, so we catch this before wasting an OMR run.
+const checkImageResolution = (inputFilePath, filename) => {
+  const ext = path.extname(filename || "").toLowerCase();
+  if (!RASTER_EXTENSIONS.includes(ext)) {
+    return;
+  }
+
+  let dimensions;
+  try {
+    dimensions = sizeOf(inputFilePath);
+  } catch (error) {
+    console.warn("Could not read image dimensions for resolution check:", error.message);
+    return;
+  }
+
+  const longEdge = Math.max(dimensions.width || 0, dimensions.height || 0);
+  if (longEdge > 0 && longEdge < MIN_SCORE_IMAGE_LONG_EDGE_PX) {
+    const lowResError = new Error(
+      `Uploaded image is only ${dimensions.width}x${dimensions.height}px, which is too low-resolution for OMR. ` +
+      `Please upload a scan of at least ${MIN_SCORE_IMAGE_LONG_EDGE_PX}px on the longest side (ideally a 300 DPI scan), ` +
+      `not a screenshot or downscaled photo.`
+    );
+    lowResError.statusCode = 422;
+    lowResError.code = "IMAGE_RESOLUTION_TOO_LOW";
+    throw lowResError;
+  }
 };
 
 exports.processMusicUpload = async (file) => {
@@ -291,6 +326,10 @@ exports.processMusicUpload = async (file) => {
   await fs.promises.mkdir(outputDir, {
     recursive: true,
   });
+
+  if (fs.existsSync(inputFilePath)) {
+    checkImageResolution(inputFilePath, file.filename);
+  }
 
   const execPromise = (command) => {
     return new Promise((resolve, reject) => {

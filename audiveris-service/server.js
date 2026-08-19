@@ -300,7 +300,14 @@ const buildAbcFromMusicXml = (xmlText, title) => {
   }
 
   const safeTitle = title || "Imported Score";
-  const body = measureTokens.join("\n");
+  // Group several bars per line so the rendered staff reads like a normal score
+  // instead of one measure per line.
+  const MEASURES_PER_LINE = 4;
+  const lines = [];
+  for (let i = 0; i < measureTokens.length; i += MEASURES_PER_LINE) {
+    lines.push(measureTokens.slice(i, i + MEASURES_PER_LINE).join(" "));
+  }
+  const body = lines.join("\n");
 
   return `X:1\nT:${safeTitle}\nM:${meter}\nL:1/8\nK:${key}\n${body}\n`;
 };
