@@ -563,7 +563,9 @@ export default function ClerkMusicScoreView() {
 
   const handleEditMusicScoreClick = () => {
     if (metadata && metadata.filename) {
-      navigate("/clerk-edit", { state: { fileName: metadata.filename } });
+      navigate("/clerk-edit", {
+        state: { fileName: metadata.filename, fileIdentifier: metadata._id },
+      });
     } else {
       console.error("Filename is not available");
     }

@@ -222,7 +222,8 @@ export default function MusicEntryClerkCatalog() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { fileName } = location.state || {};
+  const { fileName, fileIdentifier } = location.state || {};
+  const fileRef = fileIdentifier || fileName;
   const [originalData, setOriginalData] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
@@ -257,11 +258,11 @@ export default function MusicEntryClerkCatalog() {
 
   // Fetch catalog data if fileName exists
   useEffect(() => {
-    if (fileName) {
+    if (fileRef) {
       const fetchCatalogData = async () => {
         try {
           const response = await axios.get(
-            `${API_BASE_URL}/catalog/${fileName}`
+            `${API_BASE_URL}/catalog/${encodeURIComponent(fileRef)}`
           );
           if (response.data) {
             console.log("Fetched data:", response.data);
@@ -276,7 +277,7 @@ export default function MusicEntryClerkCatalog() {
 
       fetchCatalogData();
     }
-  }, [fileName]);
+  }, [fileRef]);
 
   // Fetch dynamic tabs and fields
   useEffect(() => {

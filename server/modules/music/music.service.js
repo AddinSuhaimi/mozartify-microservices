@@ -559,7 +559,9 @@ exports.getCatalogByFilename = async (filename) => {
   const uniqueCandidates = [...new Set(candidateValues.filter(Boolean))];
 
   for (const candidate of uniqueCandidates) {
-    const catalogData = await ABCFileModel.findOne({ filename: candidate }).sort({ _id: -1 });
+    const catalogData = mongoose.Types.ObjectId.isValid(candidate)
+      ? await ABCFileModel.findById(candidate)
+      : await ABCFileModel.findOne({ filename: candidate }).sort({ _id: -1 });
     if (catalogData) {
       return catalogData;
     }
@@ -573,9 +575,14 @@ exports.saveCatalogMetadata = async (filename, metadata) => {
     throw new Error("Filename is required");
   }
 
-  const latest = await ABCFileModel.findOne({ filename }).sort({ _id: -1 });
+  // Never allow the identifier used to look up the record to be overwritten by the request body.
+  const { filename: _ignoredFilename, ...safeMetadata } = metadata || {};
+
+  const latest = mongoose.Types.ObjectId.isValid(filename)
+    ? await ABCFileModel.findById(filename)
+    : await ABCFileModel.findOne({ filename }).sort({ _id: -1 });
   const abcFile = latest
-    ? await ABCFileModel.findByIdAndUpdate(latest._id, metadata, { new: true, strict: false })
+    ? await ABCFileModel.findByIdAndUpdate(latest._id, safeMetadata, { new: true, strict: false })
     : null;
 
   if (!abcFile) {
