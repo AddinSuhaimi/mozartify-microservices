@@ -5,3 +5,10 @@ services:
     build:
       args:
         VITE_API_URL: https://www.mozartify.my
+
+  backend:
+    # Production must run purely off the built image, not the host source tree —
+    # the dev bind mount + anonymous node_modules volume in docker-compose.yml
+    # causes rebuilt dependencies to be silently discarded on restart.
+    volumes:
+      - ./server/uploads:/app/uploads
