@@ -360,7 +360,7 @@ export default function ClerkMusicScoreView() {
         setMetadata(response.data);
         setTempo(extractedTempo); // Dynamically set the tempo
 
-        renderAbc(abcContent);
+        // Rendering is handled by the abcContent effect once #abc-container mounts.
       } catch (error) {
         console.error("Error fetching the ABC file and metadata:", error);
       }
