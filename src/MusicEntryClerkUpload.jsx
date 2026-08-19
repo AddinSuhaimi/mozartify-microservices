@@ -129,26 +129,29 @@ export default function MusicEntryClerkUpload() {
     },
     mainContent: {
       flexGrow: 1,
-      p: { xs: 2, sm: 3 },
-      ml: isLargeScreen ? 1 : 0, // Set margin-left to 0 for large screens
+      p: { xs: 2, sm: 3, md: 4 },
+      ml: 0,
       mt: isLargeScreen ? 2 : 8,
-      width: "100%", // Ensure full width on large screens
+      width: "100%",
     },
     uploadBox: {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      minHeight: "calc(100vh - 200px)",
+      minHeight: { xs: "auto", sm: "calc(100vh - 220px)" },
       width: "100%",
-      mt: { xs: 2, sm: 5 },
+      mt: { xs: 2, sm: 3 },
+      pb: { xs: 2, sm: 0 },
     },
     uploadContainer: {
       textAlign: "center",
-      border: "2px solid #8BD3E6",
-      borderRadius: 8,
-      padding: { xs: 2, sm: 4 },
-      width: { xs: "90%", sm: "60%", md: "40%" },
-      maxWidth: "500px",
+      border: "1px solid #8BD3E6",
+      borderRadius: 2,
+      padding: { xs: 2, sm: 3 },
+      width: { xs: "100%", sm: "min(100%, 520px)" },
+      boxSizing: "border-box",
+      backgroundColor: "#FFFFFF",
+      boxShadow: "0 10px 28px rgba(48, 130, 153, 0.08)",
     },
     importIcon: {
       width: { xs: "60px", sm: "100px" },
@@ -348,8 +351,8 @@ export default function MusicEntryClerkUpload() {
                 src={ImportIcon}
                 alt="Import Icon"
                 style={{
-                  width: isMobile ? "60px" : "100px",
-                  height: isMobile ? "60px" : "100px",
+                  width: isMobile ? "56px" : "76px",
+                  height: isMobile ? "56px" : "76px",
                 }}
               />
               <Typography
@@ -366,13 +369,13 @@ export default function MusicEntryClerkUpload() {
               <Box
                 sx={{
                   mt: 2,
-                  mb: 1,
-                  p: 2,
+                  mb: 1.5,
+                  p: 1.5,
                   width: "100%",
                   textAlign: "left",
                   backgroundColor: "#F5FAFC",
                   border: "1px solid #D6EEF5",
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <Typography
@@ -384,7 +387,13 @@ export default function MusicEntryClerkUpload() {
                 <Typography
                   component="ul"
                   variant="body2"
-                  sx={{ fontFamily: "Montserrat", pl: 2.5, m: 0, color: "#555" }}
+                  sx={{
+                    fontFamily: "Montserrat",
+                    pl: 2.25,
+                    m: 0,
+                    color: "#555",
+                    lineHeight: 1.45,
+                  }}
                 >
                   <li>Accepted formats: JPG, JPEG, PNG, or PDF</li>
                   <li>Use a clear, high-contrast scan (not a screenshot or low-res photo)</li>
@@ -407,7 +416,7 @@ export default function MusicEntryClerkUpload() {
                   variant="contained"
                   component="span"
                   fullWidth
-                  sx={{ mt: 1, ...buttonStyles }}
+                  sx={{ minHeight: 40, mt: 0, ...buttonStyles }}
                 >
                   Choose File
                 </Button>
@@ -425,7 +434,7 @@ export default function MusicEntryClerkUpload() {
                       gap: 1,
                       backgroundColor: "#FFFFFF",
                       border: "1px solid #8BD3E6",
-                      borderRadius: 2,
+                      borderRadius: 1,
                     }}
                   >
                     <InsertDriveFileIcon sx={{ color: "#8BD3E6" }} />
@@ -446,7 +455,8 @@ export default function MusicEntryClerkUpload() {
                     variant="outlined"
                     fullWidth
                     sx={{
-                      mt: 2,
+                      mt: 1.5,
+                      minHeight: 40,
                       ...buttonStyles2,
                       "&.Mui-disabled": {
                         backgroundColor: "#D3D3D3",
