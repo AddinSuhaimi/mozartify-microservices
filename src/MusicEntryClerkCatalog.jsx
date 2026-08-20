@@ -965,6 +965,17 @@ export default function MusicEntryClerkCatalog() {
                     >
                       Getting the prediction...
                     </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#fff",
+                        fontFamily: "Montserrat",
+                        mt: 1,
+                        textAlign: "center",
+                      }}
+                    >
+                      AI prediction is running, this may take a few minutes
+                    </Typography>
                   </Backdrop>
                 </Card>
               </Grid>
